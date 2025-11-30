@@ -1,4 +1,4 @@
-// index.js  (booktracker-server)
+// index.js (booktracker-server)
 
 import express from "express";
 import cors from "cors";
@@ -15,7 +15,7 @@ import bookModel from "./models/bookModel.js";
 import RequestModel from "./models/RequestModel.js";
 import favoriteModel from "./models/favoriteModel.js";
 
-dotenv.config();
+dotenv.config(); 
 
 const app = express();
 app.use(express.json());
@@ -45,8 +45,8 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// DATABASE
-await mongoose.connect("mongodb+srv://admin:Admin1234@cluster0.ahqbjgo.mongodb.net/booktracker");
+// DATABASE (uses env instead of hard-coded URI)
+await mongoose.connect(process.env.MONGO_URI);
 console.log("📡 Database Connected!");
 
 // ADMIN LOGIN
@@ -130,7 +130,6 @@ app.post(
 
       res.json({ ok: true, msg: "Book Added!" });
     } catch (err) {
-      console.log("ADD BOOK ERROR:", err);
       res.status(500).json({ ok: false, msg: "Server error" });
     }
   }
@@ -157,7 +156,8 @@ app.put(
         updateData.pdfUrl = "http://localhost:7500/uploads/pdfs/" + pdfUploaded.filename;
 
       if (imgUploaded)
-        updateData.bookImage = "http://localhost:7500/uploads/images/" + imgUploaded.filename;
+        updateData.bookImage =
+          "http://localhost:7500/uploads/images/" + imgUploaded.filename;
 
       await bookModel.findByIdAndUpdate(req.params.id, updateData);
 
@@ -190,7 +190,7 @@ app.get("/admin/getBook/:id", async (req, res) => {
   res.json({ ok: true, book });
 });
 
-// UPDATE STATUS / RATING
+// UPDATE STATUS
 app.put("/user/updateBookStatus/:id", async (req, res) => {
   await bookModel.findByIdAndUpdate(req.params.id, {
     readingStatus: req.body.readingStatus,
@@ -199,17 +199,9 @@ app.put("/user/updateBookStatus/:id", async (req, res) => {
   res.json({ ok: true, msg: "Updated!" });
 });
 
-// SEND BOOK REQUEST
+// SEND REQUEST
 app.post("/user/sendRequest", async (req, res) => {
-  const { bookName, authorName, message, userEmail } = req.body;
-
-  await RequestModel.create({
-    bookName,
-    authorName,
-    message,
-    userEmail,
-  });
-
+  await RequestModel.create(req.body);
   res.json({ ok: true, msg: "Request submitted!" });
 });
 
@@ -227,17 +219,16 @@ app.delete("/admin/deleteRequest/:id", async (req, res) => {
 
 // ADD FAVORITE
 app.post("/user/addFavorite", async (req, res) => {
-  const { userId, bookId, title, author, image, rating } = req.body;
-
+  const { userId, bookId } = req.body;
   const exist = await favoriteModel.findOne({ userId, bookId });
   if (exist) return res.json({ ok: false, msg: "Already in favorites" });
 
-  await favoriteModel.create({ userId, bookId, title, author, image, rating });
+  await favoriteModel.create(req.body);
 
   res.json({ ok: true, msg: "Added to favorites" });
 });
 
-// GET USER FAVORITES
+// GET FAVORITES
 app.get("/user/favorites/:userId", async (req, res) => {
   const data = await favoriteModel.find({ userId: req.params.userId });
   res.json({ ok: true, favorites: data });
