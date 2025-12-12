@@ -1,9 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiArrowLeft, FiMapPin } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
 export default function NearbyBookStores() {
   const [query, setQuery] = useState("");
+  const [userLocation, setUserLocation] = useState(null);
+
+  // 📌 Get user real location (Location-Based Service)
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+        });
+      },
+      () => {
+        console.log("Location permission denied");
+      }
+    );
+  }, []);
 
   const stores = [
     { name: "Seeb Library", area: "seeb", lat: 23.66794, lon: 58.18266 },
@@ -13,7 +29,6 @@ export default function NearbyBookStores() {
     { name: "Al Manhal Bookstore – Al Khoudh", area: "khoudh", lat: 23.66953, lon: 58.18058 },
   ];
 
-  // 🔍 Not case-sensitive filtering
   const filteredStores = stores.filter((store) =>
     store.area.toLowerCase().includes(query.toLowerCase())
   );
@@ -39,6 +54,13 @@ export default function NearbyBookStores() {
         <h2 className="text-center" style={{ fontWeight: 700 }}>
           Nearby Book Stores 📍
         </h2>
+
+        {/* Show user location status */}
+        <p className="text-center" style={{ fontSize: 13, color: "gray" }}>
+          {userLocation
+            ? "📍 Your location detected successfully"
+            : "📍 Detecting your location..."}
+        </p>
 
         {/* SEARCH BOX */}
         <input
