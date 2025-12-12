@@ -1,4 +1,3 @@
-// index.js (booktracker-server)
 
 import express from "express";
 import cors from "cors";
@@ -46,7 +45,7 @@ const upload = multer({ storage });
 
 // DATABASE
 await mongoose.connect(process.env.MONGO_URI);
-console.log("📡 Database Connected!");
+console.log(" Database Connected!");
 
 // ADMIN LOGIN
 app.post("/adminLogin", (req, res) => {
@@ -200,7 +199,6 @@ app.put("/user/updateBookStatus/:id", async (req, res) => {
   res.json({ ok: true, msg: "Updated!" });
 });
 
-// ⭐ FIXED: SEND REQUEST (no more "unknown user")
 app.post("/user/sendRequest", async (req, res) => {
   try {
     const { userId, bookName, authorName, message } = req.body;
@@ -312,5 +310,5 @@ app.put("/user/updateProfile/:id", async (req, res) => {
 
 // START SERVER
 app.listen(process.env.PORT, () => {
-  console.log(`🚀 Server running on ${process.env.PORT}`);
+  console.log(`Server running on ${process.env.PORT}`);
 });
