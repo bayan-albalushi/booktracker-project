@@ -1,12 +1,16 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+// ⭐ تحميل المستخدم المحفوظ إذا موجود
+const savedUser = localStorage.getItem("user")
+  ? JSON.parse(localStorage.getItem("user"))
+  : null;
+
 export const userLoginThunk = createAsyncThunk(
   "user/login",
   async (data) => {
     const res = await axios.post("http://localhost:7500/userLogin", data);
 
-    // ⭐⭐ حفظ بيانات المستخدم إذا كان تسجيل الدخول ناجح ⭐⭐
     if (res.data.login === true) {
       localStorage.setItem("user", JSON.stringify(res.data.user));
     }
@@ -18,9 +22,16 @@ export const userLoginThunk = createAsyncThunk(
 const userSlice = createSlice({
   name: "user",
   initialState: {
-    user: null,
+    user: savedUser,   // ⭐⭐⭐ هنا أهم إصلاح
     msg: null,
     role: "user",
+  },
+
+  reducers: {
+    logoutUser: (state) => {
+      state.user = null;
+      localStorage.removeItem("user");
+    },
   },
 
   extraReducers: (builder) => {
@@ -32,4 +43,5 @@ const userSlice = createSlice({
   },
 });
 
+export const { logoutUser } = userSlice.actions;
 export default userSlice.reducer;

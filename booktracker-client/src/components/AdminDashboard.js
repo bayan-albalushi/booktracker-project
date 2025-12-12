@@ -99,7 +99,7 @@ export default function AdminDashboard() {
           </Link>
 
           <Link
-            to="/admin/setting"
+            to="/admin/settings"
             className="btn"
             style={{
               border: "1px solid black",

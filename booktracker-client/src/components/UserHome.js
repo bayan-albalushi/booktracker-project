@@ -1,5 +1,5 @@
 import { Container, Row, Col } from "reactstrap";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import bookLogo from "../images/book.png";
 import { FiLogOut } from "react-icons/fi";
@@ -7,12 +7,19 @@ import { FiLogOut } from "react-icons/fi";
 export default function UserHome() {
   const user = useSelector((state) => state.user.user);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // Logout function
   const handleLogout = () => {
     localStorage.clear();
-    navigate("/"); // يرجّع لصفحة اللوجن
+    dispatch({ type: "LOGOUT" }); // لو عندك reducer للّوجن
+    navigate("/");
   };
+
+  // Prevent crash if user = null
+  if (!user) {
+    return <h3 className="text-center mt-5">Loading...</h3>;
+  }
 
   return (
     <>
@@ -75,7 +82,7 @@ export default function UserHome() {
           About Books
         </Link>
 
-        <Link to="#" className="text-dark text-decoration-none">
+        <Link to="/user-profile" className="text-dark text-decoration-none">
           User Profile
         </Link>
 
@@ -83,11 +90,11 @@ export default function UserHome() {
           Favorites
         </Link>
 
-        <Link to="#" className="text-dark text-decoration-none">
-          Book stores
+        <Link to="/user/NearbyBookStores" className="text-dark text-decoration-none">
+          Book Stores
         </Link>
 
-        <Link to="#" className="text-dark text-decoration-none">
+        <Link to="/user/Settings" className="text-dark text-decoration-none">
           Settings
         </Link>
       </div>

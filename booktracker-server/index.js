@@ -9,13 +9,12 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// MODELS
 import userModel from "./models/userModel.js";
 import bookModel from "./models/bookModel.js";
 import RequestModel from "./models/RequestModel.js";
 import favoriteModel from "./models/favoriteModel.js";
 
-dotenv.config(); 
+dotenv.config();
 
 const app = express();
 app.use(express.json());
@@ -45,7 +44,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// DATABASE (uses env instead of hard-coded URI)
+// DATABASE
 await mongoose.connect(process.env.MONGO_URI);
 console.log("📡 Database Connected!");
 
@@ -98,7 +97,7 @@ app.post("/userLogin", async (req, res) => {
   }
 });
 
-// ADD BOOK
+// ADMIN ADD BOOK
 app.post(
   "/admin/addBook",
   upload.fields([
@@ -116,7 +115,8 @@ app.post(
       const pdfUploaded = req.files.pdfFile?.[0];
       const imgUploaded = req.files.bookImage?.[0];
 
-      const pdfUrl = "http://localhost:7500/uploads/pdfs/" + pdfUploaded.filename;
+      const pdfUrl =
+        "http://localhost:7500/uploads/pdfs/" + pdfUploaded.filename;
       const imageUrl = imgUploaded
         ? "http://localhost:7500/uploads/images/" + imgUploaded.filename
         : "";
@@ -153,7 +153,8 @@ app.put(
       const imgUploaded = req.files?.bookImage?.[0];
 
       if (pdfUploaded)
-        updateData.pdfUrl = "http://localhost:7500/uploads/pdfs/" + pdfUploaded.filename;
+        updateData.pdfUrl =
+          "http://localhost:7500/uploads/pdfs/" + pdfUploaded.filename;
 
       if (imgUploaded)
         updateData.bookImage =
@@ -199,10 +200,28 @@ app.put("/user/updateBookStatus/:id", async (req, res) => {
   res.json({ ok: true, msg: "Updated!" });
 });
 
-// SEND REQUEST
+// ⭐ FIXED: SEND REQUEST (no more "unknown user")
 app.post("/user/sendRequest", async (req, res) => {
-  await RequestModel.create(req.body);
-  res.json({ ok: true, msg: "Request submitted!" });
+  try {
+    const { userId, bookName, authorName, message } = req.body;
+
+    const user = await userModel.findById(userId);
+
+    const finalData = {
+      userEmail: user ? user.userEmail : "unknown user",
+      userName: user ? user.userName : "unknown",
+      bookName,
+      authorName,
+      message,
+    };
+
+    await RequestModel.create(finalData);
+
+    res.json({ ok: true, msg: "Request submitted!" });
+  } catch (err) {
+    console.log(err);
+    res.json({ ok: false, msg: "Server error" });
+  }
 });
 
 // GET REQUESTS
@@ -233,6 +252,63 @@ app.get("/user/favorites/:userId", async (req, res) => {
   const data = await favoriteModel.find({ userId: req.params.userId });
   res.json({ ok: true, favorites: data });
 });
+
+// USER STATS
+app.get("/user/stats/:id", async (req, res) => {
+  const userId = req.params.id;
+
+  const total = await bookModel.countDocuments();
+  const reading = await bookModel.countDocuments({ readingStatus: "Reading" });
+  const completed = await bookModel.countDocuments({
+    readingStatus: "Completed",
+  });
+
+  const favorites = await favoriteModel.countDocuments({ userId });
+
+  res.json({
+    ok: true,
+    stats: { total, reading, completed, favorites },
+  });
+});
+
+// CHANGE PASSWORD
+app.put("/user/changePassword", async (req, res) => {
+  try {
+    const { userId, oldPassword, newPassword } = req.body;
+
+    const user = await userModel.findById(userId);
+    if (!user) return res.json({ ok: false, msg: "User not found" });
+
+    const match = await bcrypt.compare(oldPassword, user.userPassword);
+    if (!match) return res.json({ ok: false, msg: "Old password incorrect" });
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    await userModel.findByIdAndUpdate(userId, { userPassword: hashed });
+
+    res.json({ ok: true, msg: "Password updated successfully" });
+  } catch (err) {
+    console.log(err);
+    res.json({ ok: false, msg: "Server error" });
+  }
+});
+
+app.put("/user/updateProfile/:id", async (req, res) => {
+  try {
+    const { userName, userEmail } = req.body;
+
+    await userModel.findByIdAndUpdate(req.params.id, {
+      userName,
+      userEmail,
+    });
+
+    res.json({ ok: true, msg: "Profile updated!" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ ok: false, msg: "Update failed" });
+  }
+});
+
 
 // START SERVER
 app.listen(process.env.PORT, () => {

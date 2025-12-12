@@ -12,7 +12,6 @@ import Register from "./components/Register";
 import AdminDashboard from "./components/AdminDashboard";
 import ManageBooks from "./components/ManageBooks";
 import UserProfile from "./components/UserProfile";
-import RequestsPage from "./components/RequestsPage";
 import Footer from "./components/Footer";
 import UserHome from "./components/UserHome";
 import ForgotPw from "./components/ForgotPw";
@@ -20,6 +19,13 @@ import AboutBooks from "./components/AboutBooks";
 import BookDetails from "./components/BookDetails";
 import PdfViewer from "./components/PdfViewer";
 import MyFavorites from "./components/MyFavorites";
+import NearbyBookStores from "./components/NearbyBookStores";
+import Settings from "./components/Settings";
+import StoreMap from "./components/StoreMap";
+import AdminSettings from "./components/AdminSettings";
+import RequestsPage from "./components/RequestsPage";
+
+
 
 
 function App() {
@@ -33,16 +39,31 @@ function App() {
                 <Route path="/" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgotPassword" element={<ForgotPw />} />
+
+                {/* ADMIN */}
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/manageBooks" element={<ManageBooks />} />
-                <Route path="/user-profile" element={<UserProfile />} />
                 <Route path="/requests" element={<RequestsPage />} />
+
+
+                {/* USER */}
                 <Route path="/user/home" element={<UserHome />} />
                 <Route path="/user/aboutBooks" element={<AboutBooks />} />
+                <Route path="/user/favorites" element={<MyFavorites />} />
+
+                {/* ⭐ المساران المهمان */}
+                <Route path="/user-profile" element={<UserProfile />} />
+
                 <Route path="/books" element={<AboutBooks />} />
                 <Route path="/books/:id" element={<BookDetails />} />
                 <Route path="/pdf/:id" element={<PdfViewer />} />
-                <Route path="/user/favorites" element={<MyFavorites />} />
+
+                <Route path="/user/Settings" element={<Settings />} />
+                <Route path="/user/NearbyBookStores" element={<NearbyBookStores />} />
+                <Route path="/store-map" element={<StoreMap />} />
+                <Route path="/admin/settings" element={<AdminSettings />} />
+
+
 
               </Routes>
             </Reactstrap.Row>

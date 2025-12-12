@@ -29,16 +29,24 @@ export default function AboutBooks() {
     book.title.toLowerCase().includes(search.toLowerCase())
   );
 
-  // send request to server
+  // ⭐ FIXED — send request using userId from localStorage
   const sendRequest = async () => {
     if (!bookName || !authorName)
       return alert("Please fill book name and author name");
 
+    // نجيب بيانات اليوزر
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user) {
+      alert("User not logged in");
+      return;
+    }
+
     await axios.post("http://localhost:7500/user/sendRequest", {
+      userId: user._id,
       bookName,
       authorName,
       message,
-      userEmail: localStorage.getItem("userEmail") || "unknown user",
     });
 
     alert("Request Sent!");
@@ -104,7 +112,7 @@ export default function AboutBooks() {
         </div>
       </div>
 
-      {/* page  title */}
+      {/* page title */}
       <h2 className="text-center mt-3" style={{ fontWeight: "700" }}>
         About Books
       </h2>
@@ -198,9 +206,6 @@ export default function AboutBooks() {
         {/* request form */}
         {showRequestForm && (
           <div className="text-center mt-4 mb-5">
-
-
-            {/* book name */}
             <input
               type="text"
               placeholder="Book Name"
@@ -216,7 +221,6 @@ export default function AboutBooks() {
               }}
             />
 
-            {/* author name */}
             <input
               type="text"
               placeholder="Author Name"
@@ -232,7 +236,6 @@ export default function AboutBooks() {
               }}
             />
 
-            {/* message (optional) */}
             <textarea
               placeholder="Message (optional)"
               value={message}
@@ -247,9 +250,8 @@ export default function AboutBooks() {
               }}
             ></textarea>
 
-            {/*send request */}
-
             <br />
+
             <button
               onClick={sendRequest}
               style={{
