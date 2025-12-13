@@ -19,7 +19,7 @@ export default function PdfViewer() {
 
   useEffect(() => {
     getBook();
-  }, []); // تم تجاهل التحذير ولا يؤثر على الأداء
+  }, []); 
 
   if (!book) return <h3 className="text-center mt-5">Loading...</h3>;
 
