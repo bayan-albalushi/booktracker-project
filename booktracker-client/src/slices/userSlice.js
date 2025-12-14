@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// ⭐ تحميل المستخدم المحفوظ إذا موجود
 const savedUser = localStorage.getItem("user")
   ? JSON.parse(localStorage.getItem("user"))
   : null;
@@ -22,7 +21,7 @@ export const userLoginThunk = createAsyncThunk(
 const userSlice = createSlice({
   name: "user",
   initialState: {
-    user: savedUser,   // ⭐⭐⭐ هنا أهم إصلاح
+    user: savedUser,
     msg: null,
     role: "user",
   },
