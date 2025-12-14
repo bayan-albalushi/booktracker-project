@@ -51,7 +51,7 @@ function App() {
                 <Route path="/user/aboutBooks" element={<AboutBooks />} />
                 <Route path="/user/favorites" element={<MyFavorites />} />
 
-                {/* ⭐ المساران المهمان */}
+           
                 <Route path="/user-profile" element={<UserProfile />} />
 
                 <Route path="/books" element={<AboutBooks />} />
