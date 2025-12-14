@@ -1,9 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// ==========================
+
 // REGISTER ADMIN THUNK
-// ==========================
 export const adminRegisterThunk = createAsyncThunk(
   "admin/register",
   async (formData, thunkAPI) => {
@@ -17,9 +16,7 @@ export const adminRegisterThunk = createAsyncThunk(
   }
 );
 
-// ==========================
 // LOGIN ADMIN THUNK
-// ==========================
 export const adminLoginThunk = createAsyncThunk(
   "admin/login",
   async (formData, thunkAPI) => {
