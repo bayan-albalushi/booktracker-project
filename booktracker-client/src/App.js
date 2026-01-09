@@ -18,7 +18,6 @@ import RequestsPage from "./components/RequestsPage";
 import AdminSettings from "./components/AdminSettings";
 
 // USER
-import ProtectedRoute from "./components/ProtectedRoute";
 import UserHome from "./components/UserHome";
 import UserProfile from "./components/UserProfile";
 import AboutBooks from "./components/AboutBooks";
