@@ -1,4 +1,3 @@
-
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
@@ -19,18 +18,24 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// PUBLIC FOLDERS
+// ===============================
+// PUBLIC UPLOADS
+// ===============================
 app.use("/uploads/pdfs", express.static("uploads/pdfs"));
 app.use("/uploads/images", express.static("uploads/images"));
 
-// ENSURE FOLDERS EXIST
+// ===============================
+// ENSURE UPLOAD FOLDERS
+// ===============================
 const pdfFolder = path.join(process.cwd(), "uploads/pdfs");
 const imgFolder = path.join(process.cwd(), "uploads/images");
 
 if (!fs.existsSync(pdfFolder)) fs.mkdirSync(pdfFolder, { recursive: true });
 if (!fs.existsSync(imgFolder)) fs.mkdirSync(imgFolder, { recursive: true });
 
+// ===============================
 // MULTER
+// ===============================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (file.mimetype === "application/pdf") cb(null, "uploads/pdfs");
@@ -41,27 +46,34 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + ext);
   },
 });
+
 const upload = multer({ storage });
 
+// ===============================
 // DATABASE
+// ===============================
 await mongoose.connect(process.env.MONGO_URI);
-console.log(" Database Connected!");
+console.log("✅ Database Connected");
 
-// ADMIN LOGIN
-app.post("/adminLogin", (req, res) => {
-  const ADMIN_EMAIL = "admin@booktracker.com";
-  const ADMIN_PASSWORD = "Admin123";
+// ===============================
+// ADMIN LOGIN (Simple – for project scope)
+// ===============================
+app.post("/adminLogin", async (req, res) => {
+  const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
   if (req.body.email !== ADMIN_EMAIL)
     return res.json({ msg: "Admin not found", login: false });
 
   if (req.body.password !== ADMIN_PASSWORD)
-    return res.json({ msg: "Wrong Password", login: false });
+    return res.json({ msg: "Wrong password", login: false });
 
-  res.json({ msg: "Welcome", login: true, role: "admin" });
+  res.json({ msg: "Welcome", login: true });
 });
 
+// ===============================
 // USER REGISTER
+// ===============================
 app.post("/userRegister", async (req, res) => {
   try {
     const exist = await userModel.findOne({ userEmail: req.body.userEmail });
@@ -75,240 +87,124 @@ app.post("/userRegister", async (req, res) => {
       userPassword: hashed,
     });
 
-    res.json({ ok: true, msg: "Registered" });
-  } catch (err) {
-    res.json({ ok: false, msg: "Server Error" });
+    res.json({ ok: true, msg: "Registered successfully" });
+  } catch {
+    res.json({ ok: false, msg: "Server error" });
   }
 });
 
+// ===============================
 // USER LOGIN
+// ===============================
 app.post("/userLogin", async (req, res) => {
-  try {
-    const user = await userModel.findOne({ userEmail: req.body.email });
-    if (!user) return res.json({ msg: "User not found", login: false });
+  const user = await userModel.findOne({ userEmail: req.body.email });
+  if (!user) return res.json({ msg: "User not found", login: false });
 
-    const match = await bcrypt.compare(req.body.password, user.userPassword);
-    if (!match) return res.json({ msg: "Wrong Password", login: false });
+  const match = await bcrypt.compare(req.body.password, user.userPassword);
+  if (!match) return res.json({ msg: "Wrong password", login: false });
 
-    res.json({ msg: "Welcome", login: true, user });
-  } catch (err) {
-    res.json({ msg: "Server Error", login: false });
-  }
+  res.json({ msg: "Welcome", login: true, user });
 });
 
-// ADMIN ADD BOOK
+// ===============================
+// ADD BOOK
+// ===============================
 app.post(
   "/admin/addBook",
-  upload.fields([
-    { name: "pdfFile", maxCount: 1 },
-    { name: "bookImage", maxCount: 1 },
-  ]),
+  upload.fields([{ name: "pdfFile" }, { name: "bookImage" }]),
   async (req, res) => {
-    try {
-      const { title, author } = req.body;
+    const { title, author } = req.body;
 
-      if (!req.files || !req.files.pdfFile) {
-        return res.status(400).json({ ok: false, msg: "PDF required!" });
-      }
+    const pdf = req.files?.pdfFile?.[0];
+    const img = req.files?.bookImage?.[0];
 
-      const pdfUploaded = req.files.pdfFile?.[0];
-      const imgUploaded = req.files.bookImage?.[0];
+    if (!pdf) return res.json({ ok: false, msg: "PDF required" });
 
-      const pdfUrl =
-        "http://localhost:7500/uploads/pdfs/" + pdfUploaded.filename;
-      const imageUrl = imgUploaded
-        ? "http://localhost:7500/uploads/images/" + imgUploaded.filename
-        : "";
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
 
-      await bookModel.create({
-        title,
-        author,
-        pdfUrl,
-        bookImage: imageUrl,
-      });
+    await bookModel.create({
+      title,
+      author,
+      pdfUrl: `${baseUrl}/uploads/pdfs/${pdf.filename}`,
+      bookImage: img ? `${baseUrl}/uploads/images/${img.filename}` : "",
+    });
 
-      res.json({ ok: true, msg: "Book Added!" });
-    } catch (err) {
-      res.status(500).json({ ok: false, msg: "Server error" });
-    }
+    res.json({ ok: true, msg: "Book added" });
   }
 );
 
-// UPDATE BOOK
-app.put(
-  "/admin/updateBook/:id",
-  upload.fields([
-    { name: "pdfFile", maxCount: 1 },
-    { name: "bookImage", maxCount: 1 },
-  ]),
-  async (req, res) => {
-    try {
-      const updateData = {
-        title: req.body.title,
-        author: req.body.author,
-      };
-
-      const pdfUploaded = req.files?.pdfFile?.[0];
-      const imgUploaded = req.files?.bookImage?.[0];
-
-      if (pdfUploaded)
-        updateData.pdfUrl =
-          "http://localhost:7500/uploads/pdfs/" + pdfUploaded.filename;
-
-      if (imgUploaded)
-        updateData.bookImage =
-          "http://localhost:7500/uploads/images/" + imgUploaded.filename;
-
-      await bookModel.findByIdAndUpdate(req.params.id, updateData);
-
-      res.json({ ok: true, msg: "Book Updated!" });
-    } catch (err) {
-      res.status(500).json({ ok: false, msg: "Error updating" });
-    }
-  }
-);
-
-// DELETE BOOK
-app.delete("/admin/deleteBook/:id", async (req, res) => {
-  try {
-    await bookModel.findByIdAndDelete(req.params.id);
-    res.json({ ok: true, msg: "Book Deleted!" });
-  } catch (err) {
-    res.status(500).json({ ok: false, msg: "Delete Error" });
-  }
-});
-
-// GET ALL BOOKS
-app.get("/admin/books", async (req, res) => {
+// ===============================
+// GET BOOKS
+// ===============================
+app.get("/admin/books", async (_, res) => {
   const books = await bookModel.find();
   res.json({ ok: true, books });
 });
 
-// GET ONE BOOK
 app.get("/admin/getBook/:id", async (req, res) => {
   const book = await bookModel.findById(req.params.id);
   res.json({ ok: true, book });
 });
 
+// ===============================
 // UPDATE STATUS
+// ===============================
 app.put("/user/updateBookStatus/:id", async (req, res) => {
-  await bookModel.findByIdAndUpdate(req.params.id, {
-    readingStatus: req.body.readingStatus,
-    rating: req.body.rating,
-  });
-  res.json({ ok: true, msg: "Updated!" });
+  await bookModel.findByIdAndUpdate(req.params.id, req.body);
+  res.json({ ok: true, msg: "Updated" });
 });
 
-app.post("/user/sendRequest", async (req, res) => {
-  try {
-    const { userId, bookName, authorName, message } = req.body;
-
-    const user = await userModel.findById(userId);
-
-    const finalData = {
-      userEmail: user ? user.userEmail : "unknown user",
-      userName: user ? user.userName : "unknown",
-      bookName,
-      authorName,
-      message,
-    };
-
-    await RequestModel.create(finalData);
-
-    res.json({ ok: true, msg: "Request submitted!" });
-  } catch (err) {
-    console.log(err);
-    res.json({ ok: false, msg: "Server error" });
-  }
-});
-
-// GET REQUESTS
-app.get("/admin/requests", async (req, res) => {
-  const requests = await RequestModel.find().sort({ createdAt: -1 });
-  res.json({ ok: true, requests });
-});
-
-// DELETE REQUEST
-app.delete("/admin/deleteRequest/:id", async (req, res) => {
-  await RequestModel.findByIdAndDelete(req.params.id);
-  res.json({ ok: true, msg: "Request deleted!" });
-});
-
-// ADD FAVORITE
+// ===============================
+// FAVORITES
+// ===============================
 app.post("/user/addFavorite", async (req, res) => {
-  const { userId, bookId } = req.body;
-  const exist = await favoriteModel.findOne({ userId, bookId });
-  if (exist) return res.json({ ok: false, msg: "Already in favorites" });
+  const exist = await favoriteModel.findOne(req.body);
+  if (exist) return res.json({ ok: false, msg: "Already exists" });
 
   await favoriteModel.create(req.body);
-
   res.json({ ok: true, msg: "Added to favorites" });
 });
 
-// GET FAVORITES
 app.get("/user/favorites/:userId", async (req, res) => {
   const data = await favoriteModel.find({ userId: req.params.userId });
   res.json({ ok: true, favorites: data });
 });
 
+// ===============================
+// REQUESTS
+// ===============================
+app.post("/user/sendRequest", async (req, res) => {
+  await RequestModel.create(req.body);
+  res.json({ ok: true, msg: "Request sent" });
+});
+
+app.get("/admin/requests", async (_, res) => {
+  const requests = await RequestModel.find().sort({ createdAt: -1 });
+  res.json({ ok: true, requests });
+});
+
+app.delete("/admin/deleteRequest/:id", async (req, res) => {
+  await RequestModel.findByIdAndDelete(req.params.id);
+  res.json({ ok: true });
+});
+
+// ===============================
 // USER STATS
+// ===============================
 app.get("/user/stats/:id", async (req, res) => {
   const userId = req.params.id;
 
   const total = await bookModel.countDocuments();
   const reading = await bookModel.countDocuments({ readingStatus: "Reading" });
-  const completed = await bookModel.countDocuments({
-    readingStatus: "Completed",
-  });
-
+  const completed = await bookModel.countDocuments({ readingStatus: "Completed" });
   const favorites = await favoriteModel.countDocuments({ userId });
 
-  res.json({
-    ok: true,
-    stats: { total, reading, completed, favorites },
-  });
+  res.json({ ok: true, stats: { total, reading, completed, favorites } });
 });
 
-// CHANGE PASSWORD
-app.put("/user/changePassword", async (req, res) => {
-  try {
-    const { userId, oldPassword, newPassword } = req.body;
-
-    const user = await userModel.findById(userId);
-    if (!user) return res.json({ ok: false, msg: "User not found" });
-
-    const match = await bcrypt.compare(oldPassword, user.userPassword);
-    if (!match) return res.json({ ok: false, msg: "Old password incorrect" });
-
-    const hashed = await bcrypt.hash(newPassword, 10);
-
-    await userModel.findByIdAndUpdate(userId, { userPassword: hashed });
-
-    res.json({ ok: true, msg: "Password updated successfully" });
-  } catch (err) {
-    console.log(err);
-    res.json({ ok: false, msg: "Server error" });
-  }
-});
-
-app.put("/user/updateProfile/:id", async (req, res) => {
-  try {
-    const { userName, userEmail } = req.body;
-
-    await userModel.findByIdAndUpdate(req.params.id, {
-      userName,
-      userEmail,
-    });
-
-    res.json({ ok: true, msg: "Profile updated!" });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ ok: false, msg: "Update failed" });
-  }
-});
-
-
+// ===============================
 // START SERVER
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on ${process.env.PORT}`);
-});
+// ===============================
+app.listen(process.env.PORT, () =>
+  console.log(`🚀 Server running on port ${process.env.PORT}`)
+);
