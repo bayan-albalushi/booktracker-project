@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { FiArrowLeft, FiSearch } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import bookLogo from "../images/book.png";
 
 export default function AboutBooks() {
   const [books, setBooks] = useState([]);
@@ -16,7 +17,9 @@ export default function AboutBooks() {
 
   const getBooks = async () => {
     try {
-      const res = await axios.get("https://booktracker-project.onrender.com/admin/books");
+      const res = await axios.get(
+        "https://booktracker-project.onrender.com/admin/books"
+      );
       setBooks(res.data.books || []);
     } catch (err) {
       console.error("Error fetching books:", err);
@@ -33,18 +36,22 @@ export default function AboutBooks() {
   );
 
   const sendRequest = async () => {
-    if (!bookName || !authorName) return alert("Please fill book name and author name");
+    if (!bookName || !authorName)
+      return alert("Please fill book name and author name");
 
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) return alert("User not logged in");
 
     try {
-      await axios.post("https://booktracker-project.onrender.com/user/sendRequest", {
-        userId: user._id,
-        bookName,
-        authorName,
-        message,
-      });
+      await axios.post(
+        "https://booktracker-project.onrender.com/user/sendRequest",
+        {
+          userId: user._id,
+          bookName,
+          authorName,
+          message,
+        }
+      );
 
       alert("Request Sent!");
       setBookName("");
@@ -73,12 +80,14 @@ export default function AboutBooks() {
         </Link>
 
         <img
-          src="/images/book.png"
+          src={bookLogo}
           alt="logo"
           style={{ height: "35px", marginRight: "12px" }}
         />
 
-        <span style={{ fontSize: "24px", fontWeight: "bold" }}>BOOK TRACKER</span>
+        <span style={{ fontSize: "24px", fontWeight: "bold" }}>
+          BOOK TRACKER
+        </span>
       </div>
 
       {/* SEARCH BAR */}
@@ -140,7 +149,13 @@ export default function AboutBooks() {
                   }}
                 />
 
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: "5px",
+                  }}
+                >
                   <span style={{ fontWeight: "500" }}>{book.title}</span>
                   <span
                     style={{ fontSize: "12px", cursor: "pointer" }}
@@ -161,7 +176,8 @@ export default function AboutBooks() {
                     <span
                       key={star}
                       style={{
-                        color: star <= (book.rating || 0) ? "#A47C78" : "lightgray",
+                        color:
+                          star <= (book.rating || 0) ? "#A47C78" : "lightgray",
                       }}
                     >
                       ★
