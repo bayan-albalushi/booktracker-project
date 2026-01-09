@@ -125,8 +125,8 @@ app.post(
     await bookModel.create({
       title,
       author,
-      pdfUrl: `${baseUrl}/uploads/pdfs/${pdf.filename}`,
-      bookImage: img ? `${baseUrl}/uploads/images/${img.filename}` : "",
+      pdfUrl: `https://booktracker-project.onrender.com/uploads/pdfs/${pdf.filename}`,
+      bookImage: img ? `https://booktracker-project.onrender.com/uploads/images/${img.filename}` : "",
     });
 
     res.json({ ok: true, msg: "Book added" });
