@@ -18,7 +18,7 @@ export default function UserHome() {
     const storedEmail = localStorage.getItem("userEmail");
 
     if (!storedUser && !storedEmail) {
-      navigate("/login");
+      navigate("/");
     }
   }, [navigate]);
 
@@ -30,7 +30,7 @@ export default function UserHome() {
     localStorage.removeItem("userEmail");
 
     dispatch({ type: "user/logout" });
-    navigate("/login");
+    navigate("/");
   };
 
   // ===============================
