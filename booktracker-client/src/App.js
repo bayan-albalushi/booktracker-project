@@ -30,54 +30,44 @@ import RequestsPage from "./components/RequestsPage";
 
 function App() {
   return (
-    <>
-      <Provider store={store}>
+    <Provider store={store}>
+      <BrowserRouter>
         <Reactstrap.Container fluid className="vh-100">
-          <BrowserRouter>
-            <Reactstrap.Row className="p-3">
-              <Routes>
-                <Route path="/" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/forgotPassword" element={<ForgotPw />} />
+          <Reactstrap.Row className="p-3">
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgotPassword" element={<ForgotPw />} />
 
-                {/* ADMIN */}
-                <Route path="/admin-dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/manageBooks" element={<ManageBooks />} />
-                <Route path="/requests" element={<RequestsPage />} />
+              {/* ADMIN */}
+              <Route path="/admin-dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/manageBooks" element={<ManageBooks />} />
+              <Route path="/requests" element={<RequestsPage />} />
+              <Route path="/admin/settings" element={<AdminSettings />} />
 
+              {/* USER */}
+              <Route path="/user/home" element={<UserHome />} />
+              <Route path="/user/aboutBooks" element={<AboutBooks />} />
+              <Route path="/user/favorites" element={<MyFavorites />} />
+              <Route path="/user-profile" element={<UserProfile />} />
+              <Route path="/books" element={<AboutBooks />} />
+              <Route path="/books/:id" element={<BookDetails />} />
+              <Route path="/pdf/:id" element={<PdfViewer />} />
+              <Route path="/user/settings" element={<Settings />} />
+              <Route
+                path="/user/nearbyBookStores"
+                element={<NearbyBookStores />}
+              />
+              <Route path="/store-map" element={<StoreMap />} />
+            </Routes>
+          </Reactstrap.Row>
 
-                {/* USER */}
-                <Route path="/user/home" element={<UserHome />} />
-                <Route path="/user/aboutBooks" element={<AboutBooks />} />
-                <Route path="/user/favorites" element={<MyFavorites />} />
-
-<<<<<<< HEAD
-           
-=======
->>>>>>> f4b6d5b (Fix API base URL for Render deployment)
-                <Route path="/user-profile" element={<UserProfile />} />
-
-                <Route path="/books" element={<AboutBooks />} />
-                <Route path="/books/:id" element={<BookDetails />} />
-                <Route path="/pdf/:id" element={<PdfViewer />} />
-
-                <Route path="/user/Settings" element={<Settings />} />
-                <Route path="/user/NearbyBookStores" element={<NearbyBookStores />} />
-                <Route path="/store-map" element={<StoreMap />} />
-                <Route path="/admin/settings" element={<AdminSettings />} />
-
-
-
-              </Routes>
-            </Reactstrap.Row>
-
-            <Reactstrap.Row>
-              <Footer />
-            </Reactstrap.Row>
-          </BrowserRouter>
+          <Reactstrap.Row>
+            <Footer />
+          </Reactstrap.Row>
         </Reactstrap.Container>
-      </Provider>
-    </>
+      </BrowserRouter>
+    </Provider>
   );
 }
 
