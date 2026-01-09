@@ -8,7 +8,7 @@ const savedUser = localStorage.getItem("user")
 export const userLoginThunk = createAsyncThunk(
   "user/login",
   async (data) => {
-    const res = await axios.post("http://localhost:7500/userLogin", data);
+    const res = await axios.post("https://booktracker-project.onrender.com/userLogin", data);
 
     if (res.data.login === true) {
       localStorage.setItem("user", JSON.stringify(res.data.user));
@@ -21,7 +21,11 @@ export const userLoginThunk = createAsyncThunk(
 const userSlice = createSlice({
   name: "user",
   initialState: {
+<<<<<<< HEAD
     user: savedUser,
+=======
+    user: savedUser,   
+>>>>>>> f4b6d5b (Fix API base URL for Render deployment)
     msg: null,
     role: "user",
   },

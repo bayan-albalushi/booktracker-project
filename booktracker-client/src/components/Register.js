@@ -1,160 +1,141 @@
-import { Container, FormGroup } from "reactstrap";
-import { Link } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { useState } from "react";
-import registerSchema from "../validations/registerSchema";
+import { FiArrowLeft } from "react-icons/fi";
+import { Link, useNavigate } from "react-router-dom";
 import bookLogo from "../images/book.png";
 
-export default function Register() {
-  const [msg, setMsg] = useState("");
+export default function RequestsPage() {
+  const [requests, setRequests] = useState([]);
+  const navigate = useNavigate();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(registerSchema),
-  });
+  // ===============================
+  // BASE URL (Render أو Local)
+  // ===============================
+  const BASE_URL =
+    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
 
-  const submitForm = async (data) => {
+  // ===============================
+  // AUTH HEADER
+  // ===============================
+  const getAuthHeader = () => {
+    const token = localStorage.getItem("adminToken");
+    if (!token) {
+      navigate("/");
+      return {};
+    }
+    return {
+      Authorization: `Bearer ${token}`,
+    };
+  };
+
+  // ===============================
+  // GET REQUESTS
+  // ===============================
+  const getRequests = async () => {
     try {
-      const userData = {
-        userName: data.username,
-        userEmail: data.email,
-        userPassword: data.pwd,
-      };
-
-      const res = await axios.post(
-        "http://localhost:7500/userRegister",
-        userData
-      );
-
-      setMsg(res.data.msg);
+      const res = await axios.get(`${BASE_URL}/admin/requests`, {
+        headers: getAuthHeader(),
+      });
+      setRequests(res.data.requests || []);
     } catch (err) {
-      setMsg("Server Error");
+      console.error("Failed to fetch requests", err);
     }
   };
 
+  // ===============================
+  // DELETE REQUEST
+  // ===============================
+  const deleteReq = async (id) => {
+    try {
+      await axios.delete(
+        `${BASE_URL}/admin/deleteRequest/${id}`,
+        {
+          headers: getAuthHeader(),
+        }
+      );
+      getRequests();
+    } catch (err) {
+      console.error("Delete request failed", err);
+      alert("Failed to delete request");
+    }
+  };
+
+  useEffect(() => {
+    getRequests();
+  }, []);
+
   return (
     <>
-      {/* Placeholder Color */}
-      <style>
-        {`
-          ::placeholder {
-            color: #c2c2c2 !important;
-            opacity: 1;
-          }
-        `}
-      </style>
-
-      <Container
-        className="col-4 mt-5 shadow p-0"
-        style={{ backgroundColor: "#F5F5F5", borderRadius: "12px" }}
+      {/* HEADER */}
+      <div
+        style={{
+          backgroundColor: "#A47C78",
+          padding: "15px 20px",
+          display: "flex",
+          alignItems: "center",
+        }}
       >
-        {/* Header */}
-        <div
+        <Link to="/admin-dashboard" style={{ color: "black" }}>
+          <FiArrowLeft size={26} />
+        </Link>
+
+        <img
+          src={bookLogo}
+          alt="logo"
+          style={{ height: "35px", marginLeft: "15px" }}
+        />
+
+        <span
           style={{
-            backgroundColor: "#A47C78",
-            padding: "15px 0",
-            borderTopLeftRadius: "12px",
-            borderTopRightRadius: "12px",
-            textAlign: "center",
+            fontSize: "24px",
+            fontWeight: "bold",
+            marginLeft: "10px",
           }}
         >
-          <img
-            src={bookLogo}
-            alt="logo"
-            style={{ height: "35px", marginRight: "10px" }}
-          />
+          BOOK TRACKER
+        </span>
+      </div>
 
-          <span
+      <h2 className="text-center mt-4">Requests Page</h2>
+
+      <div className="container mt-4">
+        {requests.length === 0 && (
+          <p className="text-center">No requests yet!</p>
+        )}
+
+        {requests.map((req) => (
+          <div
+            key={req._id}
+            className="p-3 mb-3"
             style={{
-              fontSize: "22px",
-              fontWeight: "bold",
-              verticalAlign: "middle",
-              color: "black",
+              background: "#f5f5f5",
+              borderRadius: "10px",
             }}
           >
-            BOOK TRACKER
-          </span>
-        </div>
+            <h5>User: {req.userEmail}</h5>
+            <br />
 
-        {/* Form */}
-        <div className="p-4 text-center">
-          <h3 className="fw-bold mb-4">Register</h3>
+            <p>
+              <strong>Book Name:</strong> {req.bookName}
+            </p>
 
-          <form onSubmit={handleSubmit(submitForm)}>
-            {/* USERNAME */}
-            <FormGroup>
-              <input
-                type="text"
-                placeholder="Username"
-                className="form-control"
-                {...register("username")}
-              />
-              <p className="text-danger">{errors.username?.message}</p>
-            </FormGroup>
+            <p>
+              <strong>Author:</strong> {req.authorName}
+            </p>
 
-            {/* EMAIL */}
-            <FormGroup>
-              <input
-                type="email"
-                placeholder="Email"
-                className="form-control"
-                {...register("email")}
-              />
-              <p className="text-danger">{errors.email?.message}</p>
-            </FormGroup>
-
-            {/* PASSWORD */}
-            <FormGroup>
-              <input
-                type="password"
-                placeholder="Password"
-                className="form-control"
-                {...register("pwd")}
-              />
-              <p className="text-danger">{errors.pwd?.message}</p>
-            </FormGroup>
-
-            {/* CONFIRM PASSWORD */}
-            <FormGroup>
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                className="form-control"
-                {...register("confirmPwd")}
-              />
-              <p className="text-danger">{errors.confirmPwd?.message}</p>
-            </FormGroup>
+            {req.message && (
+              <p style={{ fontStyle: "italic" }}>{req.message}</p>
+            )}
 
             <button
-              className="btn w-100 mt-2"
-              style={{
-                backgroundColor: "#A47C78",
-                color: "black",
-                fontWeight: "bold",
-                borderRadius: "20px",
-              }}
+              onClick={() => deleteReq(req._id)}
+              className="btn btn-danger btn-sm"
             >
-              Sign Up
+              Delete
             </button>
-          </form>
-
-          {msg && <p className="mt-2 text-danger fw-bold">{msg}</p>}
-
-          <hr className="mt-4" />
-
-          <p>
-            Already have an account?
-            <Link className="ms-1 fw-bold text-decoration-none" to="/">
-              Sign In
-            </Link>
-          </p>
-        </div>
-      </Container>
+          </div>
+        ))}
+      </div>
     </>
   );
 }

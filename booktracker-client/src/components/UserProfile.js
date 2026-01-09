@@ -1,11 +1,14 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 
 export default function UserProfile() {
-  const { user } = useSelector((state) => state.user);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const user = useSelector((state) => state.user.user);
 
   const [stats, setStats] = useState(null);
   const [showEdit, setShowEdit] = useState(false);
@@ -14,42 +17,94 @@ export default function UserProfile() {
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
 
-  const BASE = "http://localhost:7500";
+  // ===============================
+  // BASE URL (Render أو Local)
+  // ===============================
+  const BASE_URL =
+    process.env.REACT_APP_BASE_URL || "http://localhost:7500";
 
+  // ===============================
+  // AUTH GUARD + FETCH DATA
+  // ===============================
   useEffect(() => {
-    if (!user || !user._id) return;
+    const token = localStorage.getItem("userToken");
+    const storedUser = localStorage.getItem("user");
 
-    axios.get(`${BASE}/user/stats/${user._id}`)
+    if (!token || !storedUser || !user?._id) {
+      navigate("/");
+      return;
+    }
+
+    // fetch stats
+    axios
+      .get(`${BASE_URL}/user/stats`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       .then((res) => setStats(res.data.stats))
-      .catch((err) => console.log("STATS ERROR:", err));
+      .catch((err) => console.error("STATS ERROR:", err));
 
-    // Fill edit fields
+    // fill edit fields
     setEditName(user.userName);
     setEditEmail(user.userEmail);
-  }, [user]);
+  }, [user, navigate, BASE_URL]);
 
-  if (!user || !user._id)
+  if (!user) {
     return <h3 className="text-center mt-5">Loading User...</h3>;
+  }
 
-  if (!stats)
+  if (!stats) {
     return <h3 className="text-center mt-5">Loading Stats...</h3>;
+  }
 
+  // ===============================
   // UPDATE PROFILE
+  // ===============================
   const updateProfile = async () => {
-    await axios.put(`${BASE}/user/updateProfile/${user._id}`, {
-      userName: editName,
-      userEmail: editEmail
-    });
+    if (!editName || !editEmail) {
+      alert("All fields are required");
+      return;
+    }
 
-    alert("Profile updated!");
+    try {
+      const token = localStorage.getItem("userToken");
 
-    // Update local storage user
-    const updated = { ...user, userName: editName, userEmail: editEmail };
-    localStorage.setItem("user", JSON.stringify(updated));
+      const res = await axios.put(
+        `${BASE_URL}/user/updateProfile`,
+        {
+          userName: editName,
+          userEmail: editEmail,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    // Hide form
-    setShowEdit(false);
-    window.location.reload();
+      alert(res.data.msg || "Profile updated!");
+
+      const updatedUser = {
+        ...user,
+        userName: editName,
+        userEmail: editEmail,
+      };
+
+      // update redux (even لو reducer تجاهلها ما تسوي مشكلة)
+      dispatch({
+        type: "user/updateProfile",
+        payload: updatedUser,
+      });
+
+      // update localStorage
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      setShowEdit(false);
+    } catch (err) {
+      console.error("Update profile error:", err);
+      alert("Failed to update profile");
+    }
   };
 
   return (
@@ -115,15 +170,16 @@ export default function UserProfile() {
             fontWeight: "600",
           }}
         >
-          Edit Profile
+          {showEdit ? "Cancel" : "Edit Profile"}
         </button>
 
         {/* EDIT FORM */}
         {showEdit && (
-          <div className="mt-4 p-3"
+          <div
+            className="mt-4 p-3"
             style={{
               background: "#f0f0f0",
-              borderRadius: "12px"
+              borderRadius: "12px",
             }}
           >
             <h5 style={{ fontWeight: "700" }}>Update Profile</h5>
@@ -138,7 +194,7 @@ export default function UserProfile() {
 
             <label style={{ fontWeight: 600 }}>New Email</label>
             <input
-              type="text"
+              type="email"
               className="form-control mb-3"
               value={editEmail}
               onChange={(e) => setEditEmail(e.target.value)}
@@ -161,7 +217,9 @@ export default function UserProfile() {
         )}
 
         {/* STATS */}
-        <h5 className="mt-4" style={{ fontWeight: 600 }}>Your Book Statistics</h5>
+        <h5 className="mt-4" style={{ fontWeight: 600 }}>
+          Your Book Statistics
+        </h5>
 
         <div className="row text-center mt-3">
           <div className="col-6 p-3">

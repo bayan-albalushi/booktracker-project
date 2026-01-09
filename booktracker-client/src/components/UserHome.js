@@ -1,6 +1,7 @@
 import { Container, Row, Col } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import bookLogo from "../images/book.png";
 import { FiLogOut } from "react-icons/fi";
 
@@ -9,21 +10,39 @@ export default function UserHome() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Logout function
+  // ===============================
+  // AUTH GUARD
+  // ===============================
+  useEffect(() => {
+    const token = localStorage.getItem("userToken");
+    const storedUser = localStorage.getItem("user");
+
+    if (!token || !storedUser) {
+      navigate("/");
+    }
+  }, [navigate]);
+
+  // ===============================
+  // LOGOUT
+  // ===============================
   const handleLogout = () => {
-    localStorage.clear();
-    dispatch({ type: "LOGOUT" }); // لو عندك reducer للّوجن
+    localStorage.removeItem("user");
+    localStorage.removeItem("userToken");
+
+    dispatch({ type: "user/logout" }); // safe even if reducer ignores it
     navigate("/");
   };
 
-  // Prevent crash if user = null
+  // ===============================
+  // PREVENT CRASH
+  // ===============================
   if (!user) {
     return <h3 className="text-center mt-5">Loading...</h3>;
   }
 
   return (
     <>
-      {/* Top Header */}
+      {/* TOP HEADER */}
       <div
         style={{
           backgroundColor: "#A47C78",
@@ -33,7 +52,7 @@ export default function UserHome() {
           justifyContent: "space-between",
         }}
       >
-        {/* Centered Logo + Title */}
+        {/* CENTER LOGO + TITLE */}
         <div
           style={{
             display: "flex",
@@ -59,7 +78,7 @@ export default function UserHome() {
           </span>
         </div>
 
-        {/* Logout icon */}
+        {/* LOGOUT */}
         <FiLogOut
           size={26}
           style={{ cursor: "pointer" }}
@@ -67,7 +86,7 @@ export default function UserHome() {
         />
       </div>
 
-      {/* Navbar */}
+      {/* NAVBAR */}
       <div
         style={{
           display: "flex",
@@ -90,7 +109,10 @@ export default function UserHome() {
           Favorites
         </Link>
 
-        <Link to="/user/NearbyBookStores" className="text-dark text-decoration-none">
+        <Link
+          to="/user/NearbyBookStores"
+          className="text-dark text-decoration-none"
+        >
           Book Stores
         </Link>
 
@@ -99,11 +121,13 @@ export default function UserHome() {
         </Link>
       </div>
 
-      {/* Main Content */}
+      {/* MAIN CONTENT */}
       <Container className="text-center mt-5">
         <Row>
           <Col>
-            <h1 style={{ fontWeight: "700", fontSize: "38px" }}>Welcome to</h1>
+            <h1 style={{ fontWeight: "700", fontSize: "38px" }}>
+              Welcome to
+            </h1>
             <h1 style={{ fontWeight: "700", fontSize: "38px" }}>
               Book Tracker!
             </h1>

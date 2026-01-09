@@ -51,7 +51,10 @@ function App() {
                 <Route path="/user/aboutBooks" element={<AboutBooks />} />
                 <Route path="/user/favorites" element={<MyFavorites />} />
 
+<<<<<<< HEAD
            
+=======
+>>>>>>> f4b6d5b (Fix API base URL for Render deployment)
                 <Route path="/user-profile" element={<UserProfile />} />
 
                 <Route path="/books" element={<AboutBooks />} />

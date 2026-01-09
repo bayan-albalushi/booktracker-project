@@ -5,28 +5,41 @@ import { FiArrowLeft } from "react-icons/fi";
 
 export default function BookDetails() {
   const { id } = useParams();
+
   const [book, setBook] = useState(null);
   const [rating, setRating] = useState(0);
   const [readingStatus, setReadingStatus] = useState("Reading");
 
-  const BASE_URL = "http://localhost:7500";
+  // ===============================
+  // BASE URL (Render أو Local)
+  // ===============================
+  const BASE_URL =
+    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
 
+  // ===============================
+  // GET BOOK
+  // ===============================
   const getBook = async () => {
-    const res = await axios.get(`${BASE_URL}/admin/getBook/${id}`);
-    setBook(res.data.book);
+    try {
+      const res = await axios.get(`${BASE_URL}/admin/getBook/${id}`);
 
-    setRating(res.data.book.rating);
-    setReadingStatus(res.data.book.readingStatus);
+      setBook(res.data.book);
+      setRating(res.data.book.rating || 0);
+      setReadingStatus(res.data.book.readingStatus || "Reading");
+    } catch (err) {
+      console.error("Failed to fetch book", err);
+    }
   };
 
   useEffect(() => {
     getBook();
   }, []);
 
-  if (!book) return <h3>Loading...</h3>;
+  if (!book) return <h3 className="text-center mt-5">Loading...</h3>;
 
   return (
     <>
+      {/* HEADER */}
       <div
         style={{
           backgroundColor: "#A47C78",
@@ -38,6 +51,7 @@ export default function BookDetails() {
         <Link to="/books" style={{ color: "black", marginRight: "15px" }}>
           <FiArrowLeft size={26} />
         </Link>
+
         <span style={{ fontSize: "24px", fontWeight: "bold" }}>
           BOOK TRACKER
         </span>
@@ -46,19 +60,21 @@ export default function BookDetails() {
       <h2 className="text-center mt-4">{book.title}</h2>
 
       <div className="container mt-4">
+        {/* BOOK IMAGE */}
         <img
           src={book.bookImage}
+          alt="book"
           style={{
             width: "100%",
             height: "200px",
             objectFit: "cover",
             borderRadius: "10px",
           }}
-          alt=""
         />
 
         <p className="text-center mt-3">{book.author}</p>
 
+        {/* READING STATUS */}
         <select
           className="form-select"
           value={readingStatus}
@@ -69,7 +85,8 @@ export default function BookDetails() {
           <option>Plan to read</option>
         </select>
 
-        <div className="mt-3" style={{ fontSize: "25px" }}>
+        {/* RATING */}
+        <div className="mt-3 text-center" style={{ fontSize: "25px" }}>
           {[1, 2, 3, 4, 5].map((star) => (
             <span
               key={star}
@@ -84,50 +101,74 @@ export default function BookDetails() {
           ))}
         </div>
 
-       <button
-  onClick={async () => {
-    const user = JSON.parse(localStorage.getItem("user"));
+        {/* ADD TO FAVORITE */}
+        <button
+          onClick={async () => {
+            try {
+              const user = JSON.parse(localStorage.getItem("user"));
 
-    const res = await axios.post("http://localhost:7500/user/addFavorite", {
-      userId: user._id,
-      bookId: book._id,
-      title: book.title,
-      author: book.author,
-      image: book.bookImage,
-      rating,
-    });
+              if (!user) {
+                alert("Please login first");
+                return;
+              }
 
-    alert(res.data.msg);
-  }}
-  style={{
-    backgroundColor: "#A47C78",
-    color: "white",
-    padding: "10px 20px",
-    borderRadius: "20px",
-    border: "none",
-    marginTop: "15px",
-    fontWeight: "bold",
-  }}
->
-  add to favorite
-</button>
+              const res = await axios.post(
+                `${BASE_URL}/user/addFavorite`,
+                {
+                  userId: user._id,
+                  bookId: book._id,
+                  title: book.title,
+                  author: book.author,
+                  image: book.bookImage,
+                  rating,
+                }
+              );
 
+              alert(res.data.msg);
+            } catch (err) {
+              console.error("Add favorite failed", err);
+              alert("Failed to add favorite");
+            }
+          }}
+          style={{
+            backgroundColor: "#A47C78",
+            color: "white",
+            padding: "10px 20px",
+            borderRadius: "20px",
+            border: "none",
+            marginTop: "15px",
+            fontWeight: "bold",
+            width: "100%",
+          }}
+        >
+          Add to Favorite
+        </button>
 
-
+        {/* SAVE STATUS */}
         <button
           className="btn w-100 mt-3"
           style={{ backgroundColor: "#A47C78", color: "white" }}
           onClick={async () => {
-            await axios.put(`${BASE_URL}/user/updateBookStatus/${id}`, {
-              rating,
-              readingStatus,
-            });
-            alert("Saved!");
+            try {
+              await axios.put(
+                `${BASE_URL}/user/updateBookStatus/${id}`,
+                {
+                  rating,
+                  readingStatus,
+                }
+              );
+
+              alert("Saved!");
+            } catch (err) {
+              console.error("Save failed", err);
+              alert("Failed to save");
+            }
           }}
         >
           Save
         </button>
 
+        {/* PDF */}
         <h4 className="mt-4">Book PDF</h4>
 
         <iframe

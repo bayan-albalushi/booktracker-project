@@ -1,9 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
-// ===============================
-// MOCK AXIOS
-// ===============================
 jest.mock("axios", () => ({
   get: jest.fn(),
   post: jest.fn(),
@@ -11,9 +8,7 @@ jest.mock("axios", () => ({
   delete: jest.fn(),
 }));
 
-// ===============================
-// MOCK REDUX
-// ===============================
+
 jest.mock("react-redux", () => ({
   useSelector: () => ({
     user: {
@@ -30,9 +25,7 @@ import UserHome from "../components/UserHome";
 import Settings from "../components/Settings";
 import NearbyBookStores from "../components/NearbyBookStores";
 
-// ===============================
-// TESTS (4 REQUIRED ✔)
-// ===============================
+// TESTS (4 REQUIRED )
 
 test("About Books page shows title", async () => {
   const axios = require("axios");

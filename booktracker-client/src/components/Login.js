@@ -17,9 +17,16 @@ export default function Login() {
   const navigate = useNavigate();
 
   const adminMsg = useSelector((state) => state.admin.msg);
+  const adminData = useSelector((state) => state.admin.admin);
+  const adminToken = useSelector((state) => state.admin.token);
+
   const userMsg = useSelector((state) => state.user.msg);
   const userData = useSelector((state) => state.user.user);
+  const userToken = useSelector((state) => state.user.token);
 
+  // ===============================
+  // HANDLE LOGIN
+  // ===============================
   const handleLogin = (e) => {
     e.preventDefault();
 
@@ -32,28 +39,40 @@ export default function Login() {
 
     const data = { email, password };
 
-    if (email === "admin@booktracker.com") {
+    // 🔴 لا نعتمد على إيميل ثابت
+    if (email.includes("admin")) {
       dispatch(adminLoginThunk(data));
     } else {
       dispatch(userLoginThunk(data));
     }
   };
 
+  // ===============================
+  // HANDLE AUTH RESULT
+  // ===============================
   useEffect(() => {
-    // admin login
-    if (adminMsg === "Welcome") {
-      localStorage.setItem("adminEmail", email);
+    // ADMIN LOGIN SUCCESS
+    if (adminMsg === "Welcome" && adminData && adminToken) {
+      localStorage.setItem("adminToken", adminToken);
+      localStorage.setItem("admin", JSON.stringify(adminData));
       navigate("/admin-dashboard");
     }
 
-    // user login
-    if (userMsg === "Welcome" && userData) {
-
+    // USER LOGIN SUCCESS
+    if (userMsg === "Welcome" && userData && userToken) {
+      localStorage.setItem("userToken", userToken);
       localStorage.setItem("user", JSON.stringify(userData));
-
       navigate("/user/home");
     }
-  }, [adminMsg, userMsg, userData, email, navigate]);
+  }, [
+    adminMsg,
+    adminData,
+    adminToken,
+    userMsg,
+    userData,
+    userToken,
+    navigate,
+  ]);
 
   return (
     <>
@@ -70,6 +89,7 @@ export default function Login() {
         className="col-4 mt-5 shadow p-0"
         style={{ backgroundColor: "#F5F5F5", borderRadius: "12px" }}
       >
+        {/* HEADER */}
         <div
           style={{
             backgroundColor: "#A47C78",
@@ -97,6 +117,7 @@ export default function Login() {
           </span>
         </div>
 
+        {/* FORM */}
         <div className="p-4 text-center">
           <h3 className="fw-bold mb-4">Login</h3>
 
@@ -134,6 +155,7 @@ export default function Login() {
             </button>
           </form>
 
+          {/* MESSAGES */}
           {(localMsg || adminMsg || userMsg) && (
             <p className="text-danger fw-bold mt-2">
               {localMsg || adminMsg || userMsg}

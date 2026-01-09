@@ -16,9 +16,20 @@ export default function AboutBooks() {
 
   const navigate = useNavigate();
 
+  // ✅ BASE URL (Render أو Local)
+  const BASE_URL =
+    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
+
+  // ===============================
+  // GET BOOKS
+  // ===============================
   const getBooks = async () => {
-    const res = await axios.get("http://localhost:7500/admin/books");
-    setBooks(res.data.books);
+    try {
+      const res = await axios.get(`${BASE_URL}/admin/books`);
+      setBooks(res.data.books);
+    } catch (err) {
+      console.error("Error fetching books:", err);
+    }
   };
 
   useEffect(() => {
@@ -29,12 +40,13 @@ export default function AboutBooks() {
     book.title.toLowerCase().includes(search.toLowerCase())
   );
 
-  // ⭐ FIXED — send request using userId from localStorage
+  // ===============================
+  // SEND REQUEST
+  // ===============================
   const sendRequest = async () => {
     if (!bookName || !authorName)
       return alert("Please fill book name and author name");
 
-    // نجيب بيانات اليوزر
     const user = JSON.parse(localStorage.getItem("user"));
 
     if (!user) {
@@ -42,18 +54,23 @@ export default function AboutBooks() {
       return;
     }
 
-    await axios.post("http://localhost:7500/user/sendRequest", {
-      userId: user._id,
-      bookName,
-      authorName,
-      message,
-    });
+    try {
+      await axios.post(`${BASE_URL}/user/sendRequest`, {
+        userId: user._id,
+        bookName,
+        authorName,
+        message,
+      });
 
-    alert("Request Sent!");
-    setBookName("");
-    setAuthorName("");
-    setMessage("");
-    setShowRequestForm(false);
+      alert("Request Sent!");
+      setBookName("");
+      setAuthorName("");
+      setMessage("");
+      setShowRequestForm(false);
+    } catch (err) {
+      console.error("Error sending request:", err);
+      alert("Failed to send request");
+    }
   };
 
   return (
@@ -112,12 +129,11 @@ export default function AboutBooks() {
         </div>
       </div>
 
-      {/* page title */}
       <h2 className="text-center mt-3" style={{ fontWeight: "700" }}>
         About Books
       </h2>
 
-      {/* book grid */}
+      {/* BOOK GRID */}
       <div className="container mt-4">
         <div className="row">
           {filteredBooks.map((book) => (
@@ -160,11 +176,7 @@ export default function AboutBooks() {
 
                 <p style={{ margin: 0 }}>{book.author}</p>
 
-                <select
-                  disabled
-                  className="form-select mt-2"
-                  style={{ fontSize: "14px" }}
-                >
+                <select disabled className="form-select mt-2">
                   <option>{book.readingStatus}</option>
                 </select>
 
@@ -174,7 +186,9 @@ export default function AboutBooks() {
                       key={star}
                       style={{
                         color:
-                          star <= (book.rating || 0) ? "#A47C78" : "lightgray",
+                          star <= (book.rating || 0)
+                            ? "#A47C78"
+                            : "lightgray",
                       }}
                     >
                       ★
@@ -186,7 +200,7 @@ export default function AboutBooks() {
           ))}
         </div>
 
-        {/* request button */}
+        {/* REQUEST BUTTON */}
         <div className="text-center mt-4">
           <button
             onClick={() => setShowRequestForm(!showRequestForm)}
@@ -203,7 +217,7 @@ export default function AboutBooks() {
           </button>
         </div>
 
-        {/* request form */}
+        {/* REQUEST FORM */}
         {showRequestForm && (
           <div className="text-center mt-4 mb-5">
             <input
@@ -211,14 +225,7 @@ export default function AboutBooks() {
               placeholder="Book Name"
               value={bookName}
               onChange={(e) => setBookName(e.target.value)}
-              style={{
-                width: "75%",
-                maxWidth: "400px",
-                padding: "10px",
-                borderRadius: "10px",
-                border: "1px solid #ccc",
-                marginBottom: "10px",
-              }}
+              className="form-control mb-2"
             />
 
             <input
@@ -226,42 +233,23 @@ export default function AboutBooks() {
               placeholder="Author Name"
               value={authorName}
               onChange={(e) => setAuthorName(e.target.value)}
-              style={{
-                width: "75%",
-                maxWidth: "400px",
-                padding: "10px",
-                borderRadius: "10px",
-                border: "1px solid #ccc",
-                marginBottom: "10px",
-              }}
+              className="form-control mb-2"
             />
 
             <textarea
               placeholder="Message (optional)"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              style={{
-                width: "75%",
-                maxWidth: "400px",
-                height: "80px",
-                padding: "10px",
-                borderRadius: "10px",
-                border: "1px solid #ccc",
-              }}
+              className="form-control"
             ></textarea>
-
-            <br />
 
             <button
               onClick={sendRequest}
+              className="btn mt-3"
               style={{
-                marginTop: "10px",
                 backgroundColor: "#A47C78",
                 color: "black",
-                padding: "8px 25px",
                 borderRadius: "18px",
-                border: "none",
-                fontWeight: "600",
               }}
             >
               Send Request

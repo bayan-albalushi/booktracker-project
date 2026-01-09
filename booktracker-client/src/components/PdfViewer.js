@@ -5,27 +5,54 @@ import { useEffect, useState } from "react";
 export default function PdfViewer() {
   const { id } = useParams();
   const [book, setBook] = useState(null);
+  const [error, setError] = useState("");
 
-  const BASE_URL = "http://localhost:7500";
+  // ===============================
+  // BASE URL (Render أو Local)
+  // ===============================
+  const BASE_URL =
+    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
 
+  // ===============================
+  // GET BOOK
+  // ===============================
   const getBook = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/admin/getBook/${id}`);
       setBook(res.data.book);
     } catch (err) {
-      console.log("PDF ERROR:", err);
+      console.error("PDF ERROR:", err);
+      setError("Failed to load book PDF");
     }
   };
 
   useEffect(() => {
     getBook();
-  }, []); 
+  }, []);
 
-  if (!book) return <h3 className="text-center mt-5">Loading...</h3>;
+  // ===============================
+  // STATES
+  // ===============================
+  if (error)
+    return (
+      <h3 className="text-center mt-5 text-danger">
+        {error}
+      </h3>
+    );
+
+  if (!book)
+    return <h3 className="text-center mt-5">Loading...</h3>;
 
   if (!book.pdfUrl)
-    return <h3 className="text-center mt-5 text-danger">No PDF available</h3>;
+    return (
+      <h3 className="text-center mt-5 text-danger">
+        No PDF available
+      </h3>
+    );
 
+  // ===============================
+  // UI
+  // ===============================
   return (
     <div style={{ padding: "20px" }}>
       <h2>{book.title}</h2>

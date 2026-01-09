@@ -1,23 +1,121 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function AdminSettings() {
-  // Admin static data (يمكن لاحقًا ربطه بقاعدة بيانات)
-  const adminEmail = "admin@booktracker.com";
+  const navigate = useNavigate();
 
-  const [email, setEmail] = useState(adminEmail);
+  // ===============================
+  // BASE URL (Render أو Local)
+  // ===============================
+  const BASE_URL =
+    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
+
+  // ===============================
+  // STATES
+  // ===============================
+  const [email, setEmail] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSave = () => {
-    alert("Settings saved successfully!");
+  // ===============================
+  // FETCH ADMIN DATA
+  // ===============================
+  useEffect(() => {
+    const fetchAdmin = async () => {
+      try {
+        const token = localStorage.getItem("adminToken");
+
+        if (!token) {
+          navigate("/");
+          return;
+        }
+
+        const res = await axios.get(`${BASE_URL}/admin/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setEmail(res.data.admin.email);
+      } catch (err) {
+        console.error("Failed to load admin data", err);
+        navigate("/");
+      }
+    };
+
+    fetchAdmin();
+  }, [navigate, BASE_URL]);
+
+  // ===============================
+  // UPDATE EMAIL
+  // ===============================
+  const handleSave = async () => {
+    if (!newEmail) {
+      alert("Please enter new email");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const token = localStorage.getItem("adminToken");
+
+      await axios.put(
+        `${BASE_URL}/admin/update-email`,
+        { email: newEmail },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setEmail(newEmail);
+      setNewEmail("");
+      alert("Email updated successfully!");
+    } catch (err) {
+      console.error("Email update failed", err);
+      alert("Failed to update email");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handlePasswordChange = () => {
-    if (!newPassword) return alert("Please enter new password");
-    alert("Password updated successfully!");
-    setNewPassword("");
+  // ===============================
+  // UPDATE PASSWORD
+  // ===============================
+  const handlePasswordChange = async () => {
+    if (!newPassword) {
+      alert("Please enter new password");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const token = localStorage.getItem("adminToken");
+
+      await axios.put(
+        `${BASE_URL}/admin/update-password`,
+        { password: newPassword },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setNewPassword("");
+      alert("Password updated successfully!");
+    } catch (err) {
+      console.error("Password update failed", err);
+      alert("Failed to update password");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -46,7 +144,7 @@ export default function AdminSettings() {
           Admin Settings
         </h2>
 
-        {/* ADMIN EMAIL (read only) */}
+        {/* ADMIN EMAIL */}
         <label className="mt-3" style={{ fontWeight: 600 }}>
           Admin Email
         </label>
@@ -71,7 +169,7 @@ export default function AdminSettings() {
           style={{ borderRadius: 8 }}
         />
 
-        {/* CHANGE PASSWORD SECTION */}
+        {/* CHANGE PASSWORD */}
         <hr className="mt-4" />
 
         <h5 className="text-center" style={{ fontWeight: 700 }}>
@@ -90,6 +188,7 @@ export default function AdminSettings() {
         <button
           className="btn w-100 mt-3"
           onClick={handlePasswordChange}
+          disabled={loading}
           style={{
             backgroundColor: "#A47C78",
             color: "white",
@@ -98,13 +197,14 @@ export default function AdminSettings() {
             fontWeight: 600,
           }}
         >
-          Change Password
+          {loading ? "Updating..." : "Change Password"}
         </button>
 
-        {/* SAVE SETTINGS BUTTON */}
+        {/* SAVE SETTINGS */}
         <button
           className="btn w-100 mt-4"
           onClick={handleSave}
+          disabled={loading}
           style={{
             backgroundColor: "#C1A09A",
             color: "white",
@@ -113,7 +213,7 @@ export default function AdminSettings() {
             fontWeight: 600,
           }}
         >
-          Save Settings
+          {loading ? "Saving..." : "Save Settings"}
         </button>
       </div>
     </>

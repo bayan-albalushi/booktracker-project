@@ -8,14 +8,38 @@ export default function MyFavorites() {
   const [favorites, setFavorites] = useState([]);
   const navigate = useNavigate();
 
+  // ===============================
+  // BASE URL (Render أو Local)
+  // ===============================
+  const BASE_URL =
+    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
+
+  // ===============================
+  // GET FAVORITES
+  // ===============================
   const getFavorites = async () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) return;
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const token = localStorage.getItem("userToken");
 
-    const userId = user._id;  // <<< مهم جداً
+      if (!user || !token) {
+        navigate("/");
+        return;
+      }
 
-    const res = await axios.get(`http://localhost:7500/user/favorites/${userId}`);
-    setFavorites(res.data.favorites);
+      const res = await axios.get(
+        `${BASE_URL}/user/favorites/${user._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setFavorites(res.data.favorites || []);
+    } catch (err) {
+      console.error("Failed to fetch favorites", err);
+    }
   };
 
   useEffect(() => {
@@ -37,14 +61,19 @@ export default function MyFavorites() {
           <FiArrowLeft size={26} />
         </Link>
 
-        <img src={bookLogo} style={{ height: "35px", marginRight: "10px" }} />
+        <img
+          src={bookLogo}
+          alt="logo"
+          style={{ height: "35px", marginRight: "10px" }}
+        />
+
         <span style={{ fontSize: "22px", fontWeight: "bold" }}>
           BOOK TRACKER
         </span>
       </div>
 
       <h2 className="text-center mt-3" style={{ fontWeight: "700" }}>
-        My favorite Books
+        My Favorite Books
       </h2>
 
       <div className="container mt-4">
@@ -66,7 +95,7 @@ export default function MyFavorites() {
           >
             <img
               src={fav.image}
-              alt=""
+              alt="book"
               style={{
                 width: "100%",
                 height: "150px",

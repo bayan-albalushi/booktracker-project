@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Container } from "reactstrap";
 import { FiArrowLeft } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function ManageBooks() {
+  const navigate = useNavigate();
+
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [pdfFile, setPdfFile] = useState(null);
@@ -12,64 +14,130 @@ export default function ManageBooks() {
   const [books, setBooks] = useState([]);
   const [selectedId, setSelectedId] = useState("");
 
-  const BASE_URL = "http://localhost:7500";
+  // ===============================
+  // BASE URL (Render أو Local)
+  // ===============================
+  const BASE_URL =
+    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
 
+  // ===============================
+  // AUTH HEADER
+  // ===============================
+  const getAuthHeader = () => {
+    const token = localStorage.getItem("adminToken");
+    if (!token) {
+      navigate("/");
+      return {};
+    }
+    return {
+      Authorization: `Bearer ${token}`,
+    };
+  };
+
+  // ===============================
+  // READ BOOKS
+  // ===============================
   const getBooks = async () => {
-    const res = await axios.get(`${BASE_URL}/admin/books`);
-    setBooks(res.data.books);
+    try {
+      const res = await axios.get(`${BASE_URL}/admin/books`, {
+        headers: getAuthHeader(),
+      });
+      setBooks(res.data.books);
+    } catch (err) {
+      console.error("Fetch books failed", err);
+    }
   };
 
   useEffect(() => {
     getBooks();
   }, []);
 
+  // ===============================
+  // ADD BOOK
+  // ===============================
   const addBook = async () => {
     if (!title || !author || !pdfFile || !bookImage)
       return alert("Fill all fields");
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("author", author);
-    formData.append("pdfFile", pdfFile);
-    formData.append("bookImage", bookImage);
+    try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("author", author);
+      formData.append("pdfFile", pdfFile);
+      formData.append("bookImage", bookImage);
 
-    await axios.post(`${BASE_URL}/admin/addBook`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+      await axios.post(`${BASE_URL}/admin/addBook`, formData, {
+        headers: {
+          ...getAuthHeader(),
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-    alert("Book Added!");
-    getBooks();
+      alert("Book Added!");
+      resetForm();
+      getBooks();
+    } catch (err) {
+      console.error("Add book failed", err);
+      alert("Failed to add book");
+    }
   };
 
+  // ===============================
+  // UPDATE BOOK
+  // ===============================
   const updateBook = async () => {
     if (!selectedId) return alert("Select a book first");
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("author", author);
-    if (pdfFile) formData.append("pdfFile", pdfFile);
-    if (bookImage) formData.append("bookImage", bookImage);
+    try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("author", author);
+      if (pdfFile) formData.append("pdfFile", pdfFile);
+      if (bookImage) formData.append("bookImage", bookImage);
 
-    await axios.put(`${BASE_URL}/admin/updateBook/${selectedId}`, formData);
+      await axios.put(
+        `${BASE_URL}/admin/updateBook/${selectedId}`,
+        formData,
+        {
+          headers: {
+            ...getAuthHeader(),
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-    alert("Updated!");
-    getBooks();
+      alert("Updated!");
+      resetForm();
+      getBooks();
+    } catch (err) {
+      console.error("Update failed", err);
+      alert("Failed to update book");
+    }
   };
 
+  // ===============================
+  // DELETE BOOK
+  // ===============================
   const deleteBook = async () => {
     if (!selectedId) return alert("Select a book first");
 
-    await axios.delete(`${BASE_URL}/admin/deleteBook/${selectedId}`);
+    try {
+      await axios.delete(`${BASE_URL}/admin/deleteBook/${selectedId}`, {
+        headers: getAuthHeader(),
+      });
 
-    alert("Deleted!");
-    getBooks();
-    setSelectedId("");
-    setTitle("");
-    setAuthor("");
-    setPdfFile(null);
-    setBookImage(null);
+      alert("Deleted!");
+      resetForm();
+      getBooks();
+    } catch (err) {
+      console.error("Delete failed", err);
+      alert("Failed to delete book");
+    }
   };
 
+  // ===============================
+  // HELPERS
+  // ===============================
   const fillForm = (book) => {
     setSelectedId(book._id);
     setTitle(book.title);
@@ -78,8 +146,17 @@ export default function ManageBooks() {
     setBookImage(null);
   };
 
+  const resetForm = () => {
+    setSelectedId("");
+    setTitle("");
+    setAuthor("");
+    setPdfFile(null);
+    setBookImage(null);
+  };
+
   return (
     <>
+      {/* HEADER */}
       <div style={{ backgroundColor: "#A47C78", padding: 15, display: "flex" }}>
         <Link to="/admin-dashboard" style={{ color: "black" }}>
           <FiArrowLeft size={26} />
@@ -92,6 +169,7 @@ export default function ManageBooks() {
       <Container className="mt-4">
         <h3 className="text-center">Manage Books</h3>
 
+        {/* FORM */}
         <div style={{ maxWidth: 420, margin: "0 auto" }}>
           <label>Title:</label>
           <input
@@ -126,42 +204,21 @@ export default function ManageBooks() {
           {/* BUTTONS */}
           <div className="d-flex justify-content-between mt-4">
             <button
-              style={{
-                backgroundColor: "#A47C78",
-                color: "black",
-                width: "30%",
-                borderRadius: "8px",
-                border: "none",
-                padding: "8px 0",
-              }}
+              style={btnStyle}
               onClick={addBook}
             >
               Add Book
             </button>
 
             <button
-              style={{
-                backgroundColor: "#A47C78",
-                color: "black",
-                width: "30%",
-                borderRadius: "8px",
-                border: "none",
-                padding: "8px 0",
-              }}
+              style={btnStyle}
               onClick={updateBook}
             >
               Update Book
             </button>
 
             <button
-              style={{
-                backgroundColor: "#A47C78",
-                color: "black",
-                width: "30%",
-                borderRadius: "8px",
-                border: "none",
-                padding: "8px 0",
-              }}
+              style={btnStyle}
               onClick={deleteBook}
             >
               Delete
@@ -169,7 +226,7 @@ export default function ManageBooks() {
           </div>
         </div>
 
-        {/* ====== DISPLAY BOOKS WITH IMAGE + PDF ====== */}
+        {/* BOOK LIST */}
         <h4 className="mt-5">Books List:</h4>
 
         <div className="row">
@@ -202,8 +259,8 @@ export default function ManageBooks() {
                 <a
                   href={book.pdfUrl}
                   target="_blank"
-                  style={{ fontSize: "14px", color: "#A47C78" }}
                   rel="noreferrer"
+                  style={{ fontSize: "14px", color: "#A47C78" }}
                 >
                   📄 View PDF
                 </a>
@@ -215,3 +272,15 @@ export default function ManageBooks() {
     </>
   );
 }
+
+// ===============================
+// BUTTON STYLE
+// ===============================
+const btnStyle = {
+  backgroundColor: "#A47C78",
+  color: "black",
+  width: "30%",
+  borderRadius: "8px",
+  border: "none",
+  padding: "8px 0",
+};
