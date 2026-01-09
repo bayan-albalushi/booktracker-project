@@ -43,7 +43,7 @@ export default function AdminSettings() {
     };
 
     fetchAdmin();
-  }, [navigate, BASE_URL]);
+  }, [navigate, "https://booktracker-project.onrender.com"]);
 
   // ===============================
   // UPDATE EMAIL
@@ -95,7 +95,7 @@ export default function AdminSettings() {
       const token = localStorage.getItem("adminToken");
 
       await axios.put(
-        `${BASE_URL}/admin/update-password`,
+        "https://booktracker-project.onrender.com/admin/update-password",
         { password: newPassword },
         {
           headers: {

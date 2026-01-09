@@ -62,7 +62,7 @@ export default function ManageBooks() {
       formData.append("pdfFile", pdfFile);
       formData.append("bookImage", bookImage);
 
-      await axios.post(`${BASE_URL}/admin/addBook`, formData, {
+      await axios.post("https://booktracker-project.onrender.com/admin/addBook", formData, {
         headers: {
           ...getAuthHeader(),
           "Content-Type": "multipart/form-data",
