@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 
-// COMPONENTS
+// AUTH
 import Login from "./components/Login";
 import Register from "./components/Register";
 import ForgotPw from "./components/ForgotPw";
@@ -18,6 +18,7 @@ import RequestsPage from "./components/RequestsPage";
 import AdminSettings from "./components/AdminSettings";
 
 // USER
+import ProtectedRoute from "./components/ProtectedRoute";
 import UserHome from "./components/UserHome";
 import UserProfile from "./components/UserProfile";
 import AboutBooks from "./components/AboutBooks";
@@ -46,21 +47,23 @@ function App() {
               <Route path="/requests" element={<RequestsPage />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
 
-              {/* USER */}
-              <Route path="/user/home" element={<UserHome />} />
-              <Route path="/user/aboutBooks" element={<AboutBooks />} />
-              <Route path="/user/profile" element={<UserProfile />} />
-              <Route path="/user/favorites" element={<MyFavorites />} />
-              <Route
-                path="/user/nearbyBookStores"
-                element={<NearbyBookStores />}
-              />
-              <Route path="/user/settings" element={<Settings />} />
+              {/* USER (PROTECTED) */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/user/home" element={<UserHome />} />
+                <Route path="/user/aboutBooks" element={<AboutBooks />} />
+                <Route path="/user/profile" element={<UserProfile />} />
+                <Route path="/user/favorites" element={<MyFavorites />} />
+                <Route
+                  path="/user/nearbyBookStores"
+                  element={<NearbyBookStores />}
+                />
+                <Route path="/user/settings" element={<Settings />} />
 
-              {/* BOOKS */}
-              <Route path="/books/:id" element={<BookDetails />} />
-              <Route path="/pdf/:id" element={<PdfViewer />} />
-              <Route path="/store-map" element={<StoreMap />} />
+                {/* إذا BookDetails/PdfViewer للمستخدم بعد تسجيل الدخول */}
+                <Route path="/books/:id" element={<BookDetails />} />
+                <Route path="/pdf/:id" element={<PdfViewer />} />
+                <Route path="/store-map" element={<StoreMap />} />
+              </Route>
             </Routes>
           </Reactstrap.Row>
 

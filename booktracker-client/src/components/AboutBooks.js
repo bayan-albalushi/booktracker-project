@@ -2,13 +2,12 @@ import { useEffect, useState } from "react";
 import { FiArrowLeft, FiSearch } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import bookLogo from "../images/book.png";
+import { API_BASE_URL } from "../api";
 
 export default function AboutBooks() {
   const [books, setBooks] = useState([]);
   const [search, setSearch] = useState("");
 
-  // Request Form
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [bookName, setBookName] = useState("");
   const [authorName, setAuthorName] = useState("");
@@ -16,15 +15,10 @@ export default function AboutBooks() {
 
   const navigate = useNavigate();
 
-
-
-  // ===============================
-  // GET BOOKS
-  // ===============================
   const getBooks = async () => {
     try {
-      const res = await axios.get( "https://booktracker-project.onrender.com/admin/books");
-      setBooks(res.data.books);
+      const res = await axios.get(`${API_BASE_URL}/admin/books`);
+      setBooks(res.data.books || []);
     } catch (err) {
       console.error("Error fetching books:", err);
     }
@@ -32,28 +26,21 @@ export default function AboutBooks() {
 
   useEffect(() => {
     getBooks();
+    // eslint-disable-next-line
   }, []);
 
   const filteredBooks = books.filter((book) =>
-    book.title.toLowerCase().includes(search.toLowerCase())
+    (book.title || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  // ===============================
-  // SEND REQUEST
-  // ===============================
   const sendRequest = async () => {
-    if (!bookName || !authorName)
-      return alert("Please fill book name and author name");
+    if (!bookName || !authorName) return alert("Please fill book name and author name");
 
     const user = JSON.parse(localStorage.getItem("user"));
-
-    if (!user) {
-      alert("User not logged in");
-      return;
-    }
+    if (!user) return alert("User not logged in");
 
     try {
-      await axios.post("https://booktracker-project.onrender.com/user/sendRequest", {
+      await axios.post(`${API_BASE_URL}/user/sendRequest`, {
         userId: user._id,
         bookName,
         authorName,
@@ -87,14 +74,12 @@ export default function AboutBooks() {
         </Link>
 
         <img
-          src={bookLogo}
+          src="/images/book.png"
           alt="logo"
           style={{ height: "35px", marginRight: "12px" }}
         />
 
-        <span style={{ fontSize: "24px", fontWeight: "bold" }}>
-          BOOK TRACKER
-        </span>
+        <span style={{ fontSize: "24px", fontWeight: "bold" }}>BOOK TRACKER</span>
       </div>
 
       {/* SEARCH BAR */}
@@ -144,8 +129,9 @@ export default function AboutBooks() {
                 }}
               >
                 <img
-                  src={book.bookImage}
+                  src={book.bookImage || "/images/book.png"}
                   alt="book"
+                  onError={(e) => (e.currentTarget.src = "/images/book.png")}
                   style={{
                     width: "100%",
                     height: "120px",
@@ -155,15 +141,8 @@ export default function AboutBooks() {
                   }}
                 />
 
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "5px",
-                  }}
-                >
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
                   <span style={{ fontWeight: "500" }}>{book.title}</span>
-
                   <span
                     style={{ fontSize: "12px", cursor: "pointer" }}
                     onClick={() => navigate(`/books/${book._id}`)}
@@ -183,10 +162,7 @@ export default function AboutBooks() {
                     <span
                       key={star}
                       style={{
-                        color:
-                          star <= (book.rating || 0)
-                            ? "#A47C78"
-                            : "lightgray",
+                        color: star <= (book.rating || 0) ? "#A47C78" : "lightgray",
                       }}
                     >
                       ★
@@ -239,7 +215,7 @@ export default function AboutBooks() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="form-control"
-            ></textarea>
+            />
 
             <button
               onClick={sendRequest}
