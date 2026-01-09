@@ -4,6 +4,7 @@ import { FiArrowLeft } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 
+
 export default function UserProfile() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
