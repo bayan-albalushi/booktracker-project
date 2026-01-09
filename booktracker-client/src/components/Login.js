@@ -50,20 +50,20 @@ export default function Login() {
     }
   }, [email, password, dispatch]);
 
-  // ✅ handle result
+
   useEffect(() => {
-    if (adminMsg === "Welcome" && adminData) {
+    if (adminData) {
       localStorage.setItem("admin", JSON.stringify(adminData));
       dispatch(clearAdminMsg());
       navigate("/admin-dashboard");
     }
 
-    if (userMsg === "Welcome" && userData) {
+    if (userData) {
       localStorage.setItem("user", JSON.stringify(userData));
       dispatch(clearUserMsg());
       navigate("/user/home");
     }
-  }, [adminMsg, adminData, userMsg, userData, navigate, dispatch]);
+  }, [adminData, userData, navigate, dispatch]);
 
   return (
     <>
