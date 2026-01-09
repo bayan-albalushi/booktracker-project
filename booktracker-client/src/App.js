@@ -46,6 +46,7 @@ function App() {
               <Route path="/admin/settings" element={<AdminSettings />} />
 
               {/* USER (PROTECTED) */}
+              
                 <Route path="/user/home" element={<UserHome />} />
                 <Route path="/user/aboutBooks" element={<AboutBooks />} />
                 <Route path="/user/profile" element={<UserProfile />} />
@@ -59,7 +60,6 @@ function App() {
                 <Route path="/books/:id" element={<BookDetails />} />
                 <Route path="/pdf/:id" element={<PdfViewer />} />
                 <Route path="/store-map" element={<StoreMap />} />
-              </Route>
             </Routes>
           </Reactstrap.Row>
 
