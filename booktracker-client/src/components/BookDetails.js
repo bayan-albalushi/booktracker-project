@@ -10,18 +10,14 @@ export default function BookDetails() {
   const [rating, setRating] = useState(0);
   const [readingStatus, setReadingStatus] = useState("Reading");
 
-  // ===============================
-  // BASE URL (Render أو Local)
-  // ===============================
-  const BASE_URL =
-    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
+  
 
   // ===============================
   // GET BOOK
   // ===============================
   const getBook = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/admin/getBook/${id}`);
+      const res = await axios.get("https://booktracker-project.onrender.com/admin/getBook/${id}");
 
       setBook(res.data.book);
       setRating(res.data.book.rating || 0);

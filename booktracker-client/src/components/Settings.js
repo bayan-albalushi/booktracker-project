@@ -42,7 +42,7 @@ export default function Settings() {
       const token = localStorage.getItem("userToken");
 
       const res = await axios.put(
-        `${BASE_URL}/user/changePassword`,
+      "https://booktracker-project.onrender.com/user/changePassword",
         {
           oldPassword: oldPwd,
           newPassword: newPwd,

@@ -1,13 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-
+// ==========================
 // REGISTER ADMIN THUNK
+// ==========================
 export const adminRegisterThunk = createAsyncThunk(
   "admin/register",
   async (formData, thunkAPI) => {
     try {
-      const res = await axios.post("http://localhost:7500/adminRegister", formData);
+      const res = await axios.post("https://booktracker-project.onrender.com/adminRegister", formData);
       if (!res.data.ok) return thunkAPI.rejectWithValue(res.data.msg);
       return res.data.msg;
     } catch (err) {
@@ -16,12 +17,14 @@ export const adminRegisterThunk = createAsyncThunk(
   }
 );
 
+// ==========================
 // LOGIN ADMIN THUNK
+// ==========================
 export const adminLoginThunk = createAsyncThunk(
   "admin/login",
   async (formData, thunkAPI) => {
     try {
-      const res = await axios.post("http://localhost:7500/adminLogin", formData);
+      const res = await axios.post("https://booktracker-project.onrender.com/adminLogin", formData);
       if (!res.data.login) return thunkAPI.rejectWithValue(res.data.msg);
 
       return res.data.admin; // return admin data

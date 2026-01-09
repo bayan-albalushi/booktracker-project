@@ -8,12 +8,7 @@ export default function RequestsPage() {
   const [requests, setRequests] = useState([]);
   const navigate = useNavigate();
 
-  // ===============================
-  // BASE URL (Render أو Local)
-  // ===============================
-  const BASE_URL =
-    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
-
+  
   // ===============================
   // AUTH HEADER (Admin)
   // ===============================
@@ -33,7 +28,7 @@ export default function RequestsPage() {
   // ===============================
   const getRequests = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/admin/requests`, {
+      const res = await axios.get("https://booktracker-project.onrender.com/admin/requests", {
         headers: getAuthHeader(),
       });
       setRequests(res.data.requests || []);
@@ -48,7 +43,7 @@ export default function RequestsPage() {
   const deleteReq = async (id) => {
     try {
       await axios.delete(
-        `${BASE_URL}/admin/deleteRequest/${id}`,
+        `https://booktracker-project.onrender.com/admin/deleteRequest/${id}`,
         {
           headers: getAuthHeader(),
         }

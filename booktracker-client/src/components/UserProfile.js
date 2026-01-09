@@ -21,7 +21,7 @@ export default function UserProfile() {
   // BASE URL (Render أو Local)
   // ===============================
   const BASE_URL =
-    process.env.REACT_APP_BASE_URL || "http://localhost:7500";
+    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
 
   // ===============================
   // AUTH GUARD + FETCH DATA
@@ -37,7 +37,7 @@ export default function UserProfile() {
 
     // fetch stats
     axios
-      .get(`${BASE_URL}/user/stats`, {
+      .get("https://booktracker-project.onrender.com/user/stats", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -71,7 +71,7 @@ export default function UserProfile() {
       const token = localStorage.getItem("userToken");
 
       const res = await axios.put(
-        `${BASE_URL}/user/updateProfile`,
+        "https://booktracker-project.onrender.com/user/updateProfile",
         {
           userName: editName,
           userEmail: editEmail,
@@ -91,7 +91,6 @@ export default function UserProfile() {
         userEmail: editEmail,
       };
 
-      // update redux (even لو reducer تجاهلها ما تسوي مشكلة)
       dispatch({
         type: "user/updateProfile",
         payload: updatedUser,

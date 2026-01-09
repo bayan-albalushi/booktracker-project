@@ -7,18 +7,14 @@ export default function PdfViewer() {
   const [book, setBook] = useState(null);
   const [error, setError] = useState("");
 
-  // ===============================
-  // BASE URL (Render أو Local)
-  // ===============================
-  const BASE_URL =
-    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
+
 
   // ===============================
   // GET BOOK
   // ===============================
   const getBook = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/admin/getBook/${id}`);
+      const res = await axios.get(` https://booktracker-project.onrender.com/admin/getBook/${id}`);
       setBook(res.data.book);
     } catch (err) {
       console.error("PDF ERROR:", err);

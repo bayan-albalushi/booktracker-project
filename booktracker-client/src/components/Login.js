@@ -39,7 +39,6 @@ export default function Login() {
 
     const data = { email, password };
 
-    // 🔴 لا نعتمد على إيميل ثابت
     if (email.includes("admin")) {
       dispatch(adminLoginThunk(data));
     } else {

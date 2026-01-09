@@ -21,11 +21,7 @@ export const userLoginThunk = createAsyncThunk(
 const userSlice = createSlice({
   name: "user",
   initialState: {
-<<<<<<< HEAD
-    user: savedUser,
-=======
     user: savedUser,   
->>>>>>> f4b6d5b (Fix API base URL for Render deployment)
     msg: null,
     role: "user",
   },

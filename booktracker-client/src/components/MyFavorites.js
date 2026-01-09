@@ -8,11 +8,7 @@ export default function MyFavorites() {
   const [favorites, setFavorites] = useState([]);
   const navigate = useNavigate();
 
-  // ===============================
-  // BASE URL (Render أو Local)
-  // ===============================
-  const BASE_URL =
-    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
+  
 
   // ===============================
   // GET FAVORITES
@@ -28,7 +24,7 @@ export default function MyFavorites() {
       }
 
       const res = await axios.get(
-        `${BASE_URL}/user/favorites/${user._id}`,
+        `https://booktracker-project.onrender.com/user/favorites/${user._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

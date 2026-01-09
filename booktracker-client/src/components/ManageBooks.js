@@ -14,11 +14,7 @@ export default function ManageBooks() {
   const [books, setBooks] = useState([]);
   const [selectedId, setSelectedId] = useState("");
 
-  // ===============================
-  // BASE URL (Render أو Local)
-  // ===============================
-  const BASE_URL =
-    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
+  
 
   // ===============================
   // AUTH HEADER
@@ -39,7 +35,7 @@ export default function ManageBooks() {
   // ===============================
   const getBooks = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/admin/books`, {
+      const res = await axios.get( "https://booktracker-project.onrender.com/admin/books", {
         headers: getAuthHeader(),
       });
       setBooks(res.data.books);

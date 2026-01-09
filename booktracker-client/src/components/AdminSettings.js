@@ -6,11 +6,7 @@ import axios from "axios";
 export default function AdminSettings() {
   const navigate = useNavigate();
 
-  // ===============================
-  // BASE URL (Render أو Local)
-  // ===============================
-  const BASE_URL =
-    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
+  
 
   // ===============================
   // STATES
@@ -33,7 +29,7 @@ export default function AdminSettings() {
           return;
         }
 
-        const res = await axios.get(`${BASE_URL}/admin/profile`, {
+        const res = await axios.get("https://booktracker-project.onrender.com/admin/profile", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -64,7 +60,7 @@ export default function AdminSettings() {
       const token = localStorage.getItem("adminToken");
 
       await axios.put(
-        `${BASE_URL}/admin/update-email`,
+        `"https://booktracker-project.onrender.com/admin/update-email`,
         { email: newEmail },
         {
           headers: {

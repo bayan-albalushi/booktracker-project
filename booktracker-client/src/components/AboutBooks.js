@@ -16,16 +16,14 @@ export default function AboutBooks() {
 
   const navigate = useNavigate();
 
-  // ✅ BASE URL (Render أو Local)
-  const BASE_URL =
-    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
+
 
   // ===============================
   // GET BOOKS
   // ===============================
   const getBooks = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/admin/books`);
+      const res = await axios.get( "https://booktracker-project.onrender.com/admin/books");
       setBooks(res.data.books);
     } catch (err) {
       console.error("Error fetching books:", err);
