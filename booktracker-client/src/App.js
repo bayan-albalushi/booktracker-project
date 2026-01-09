@@ -30,44 +30,51 @@ import RequestsPage from "./components/RequestsPage";
 
 function App() {
   return (
-    <Provider store={store}>
-      <BrowserRouter>
+    <>
+      <Provider store={store}>
         <Reactstrap.Container fluid className="vh-100">
-          <Reactstrap.Row className="p-3">
-            <Routes>
-              <Route path="/" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgotPassword" element={<ForgotPw />} />
+          <BrowserRouter>
+            <Reactstrap.Row className="p-3">
+              <Routes>
+                <Route path="/" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgotPassword" element={<ForgotPw />} />
 
-              {/* ADMIN */}
-              <Route path="/admin-dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/manageBooks" element={<ManageBooks />} />
-              <Route path="/requests" element={<RequestsPage />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
+                {/* ADMIN */}
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/manageBooks" element={<ManageBooks />} />
+                <Route path="/requests" element={<RequestsPage />} />
 
-              {/* USER */}
-              <Route path="/user/home" element={<UserHome />} />
-              <Route path="/user/aboutBooks" element={<AboutBooks />} />
-              <Route path="/user/favorites" element={<MyFavorites />} />
-              <Route path="/user-profile" element={<UserProfile />} />
-              <Route path="/books" element={<AboutBooks />} />
-              <Route path="/books/:id" element={<BookDetails />} />
-              <Route path="/pdf/:id" element={<PdfViewer />} />
-              <Route path="/user/settings" element={<Settings />} />
-              <Route
-                path="/user/nearbyBookStores"
-                element={<NearbyBookStores />}
-              />
-              <Route path="/store-map" element={<StoreMap />} />
-            </Routes>
-          </Reactstrap.Row>
 
-          <Reactstrap.Row>
-            <Footer />
-          </Reactstrap.Row>
+                {/* USER */}
+                <Route path="/user/home" element={<UserHome />} />
+                <Route path="/user/aboutBooks" element={<AboutBooks />} />
+                <Route path="/user/favorites" element={<MyFavorites />} />
+
+                {/* ⭐ المساران المهمان */}
+                <Route path="/user-profile" element={<UserProfile />} />
+
+                <Route path="/books" element={<AboutBooks />} />
+                <Route path="/books/:id" element={<BookDetails />} />
+                <Route path="/pdf/:id" element={<PdfViewer />} />
+
+                <Route path="/user/Settings" element={<Settings />} />
+                <Route path="/user/NearbyBookStores" element={<NearbyBookStores />} />
+                <Route path="/store-map" element={<StoreMap />} />
+                <Route path="/admin/settings" element={<AdminSettings />} />
+
+
+
+              </Routes>
+            </Reactstrap.Row>
+
+            <Reactstrap.Row>
+              <Footer />
+            </Reactstrap.Row>
+          </BrowserRouter>
         </Reactstrap.Container>
-      </BrowserRouter>
-    </Provider>
+      </Provider>
+    </>
   );
 }
 
