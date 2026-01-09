@@ -2,7 +2,6 @@ import { Container, Row, Col } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import bookLogo from "../images/book.png";
 import { FiLogOut } from "react-icons/fi";
 
 export default function UserHome() {
@@ -11,7 +10,7 @@ export default function UserHome() {
   const dispatch = useDispatch();
 
   // ===============================
-  // AUTH GUARD (FIXED)
+  // AUTH GUARD
   // ===============================
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -28,13 +27,12 @@ export default function UserHome() {
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("userEmail");
-
     dispatch({ type: "user/logout" });
     navigate("/");
   };
 
   // ===============================
-  // PREVENT CRASH (LIVE SAFE)
+  // PREVENT CRASH
   // ===============================
   if (!user && !localStorage.getItem("user")) {
     return <h3 className="text-center mt-5">Loading...</h3>;
@@ -42,14 +40,14 @@ export default function UserHome() {
 
   return (
     <>
-      {/* TOP HEADER */}
+      {/* HEADER */}
       <div
         style={{
           backgroundColor: "#A47C78",
           padding: "15px 20px",
           display: "flex",
-          alignItems: "center",
           justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
         <div
@@ -58,29 +56,19 @@ export default function UserHome() {
             alignItems: "center",
             justifyContent: "center",
             flex: 1,
+            fontSize: "24px",
+            fontWeight: "bold",
           }}
         >
           <img
-            src={bookLogo}
+            src="/images/book.png"
             alt="logo"
             style={{ height: "35px", marginRight: "12px" }}
           />
-          <span
-            style={{
-              fontSize: "24px",
-              fontWeight: "bold",
-              color: "black",
-            }}
-          >
-            BOOK TRACKER
-          </span>
+          BOOK TRACKER
         </div>
 
-        <FiLogOut
-          size={26}
-          style={{ cursor: "pointer" }}
-          onClick={handleLogout}
-        />
+        <FiLogOut size={26} style={{ cursor: "pointer" }} onClick={handleLogout} />
       </div>
 
       {/* NAVBAR */}
@@ -98,7 +86,7 @@ export default function UserHome() {
           About Books
         </Link>
 
-        <Link to="/user-profile" className="text-dark text-decoration-none">
+        <Link to="/user/profile" className="text-dark text-decoration-none">
           User Profile
         </Link>
 
@@ -107,26 +95,23 @@ export default function UserHome() {
         </Link>
 
         <Link
-          to="/user/NearbyBookStores"
+          to="/user/nearbyBookStores"
           className="text-dark text-decoration-none"
         >
           Book Stores
         </Link>
 
-        <Link to="/user/Settings" className="text-dark text-decoration-none">
+        <Link to="/user/settings" className="text-dark text-decoration-none">
           Settings
         </Link>
       </div>
 
-      {/* MAIN CONTENT */}
+      {/* CONTENT */}
       <Container className="text-center mt-5">
         <Row>
           <Col>
             <h1 style={{ fontWeight: "700", fontSize: "38px" }}>
-              Welcome to
-            </h1>
-            <h1 style={{ fontWeight: "700", fontSize: "38px" }}>
-              Book Tracker!
+              Welcome to Book Tracker!
             </h1>
 
             <p

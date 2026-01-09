@@ -19,13 +19,12 @@ app.use(express.json());
 app.use(cors());
 
 // ===============================
-// PUBLIC UPLOADS
+// PUBLIC STATIC UPLOADS
 // ===============================
-app.use("/uploads/pdfs", express.static("uploads/pdfs"));
-app.use("/uploads/images", express.static("uploads/images"));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // ===============================
-// ENSURE UPLOAD FOLDERS
+// ENSURE UPLOAD FOLDERS EXIST
 // ===============================
 const pdfFolder = path.join(process.cwd(), "uploads/pdfs");
 const imgFolder = path.join(process.cwd(), "uploads/images");
@@ -34,12 +33,15 @@ if (!fs.existsSync(pdfFolder)) fs.mkdirSync(pdfFolder, { recursive: true });
 if (!fs.existsSync(imgFolder)) fs.mkdirSync(imgFolder, { recursive: true });
 
 // ===============================
-// MULTER
+// MULTER CONFIG
 // ===============================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    if (file.mimetype === "application/pdf") cb(null, "uploads/pdfs");
-    else cb(null, "uploads/images");
+    if (file.mimetype === "application/pdf") {
+      cb(null, "uploads/pdfs");
+    } else {
+      cb(null, "uploads/images");
+    }
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
@@ -56,17 +58,19 @@ await mongoose.connect(process.env.MONGO_URI);
 console.log("✅ Database Connected");
 
 // ===============================
-// ADMIN LOGIN (Simple – for project scope)
+// ADMIN LOGIN
 // ===============================
 app.post("/adminLogin", async (req, res) => {
   const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
   const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-  if (req.body.email !== ADMIN_EMAIL)
+  if (req.body.email !== ADMIN_EMAIL) {
     return res.json({ msg: "Admin not found", login: false });
+  }
 
-  if (req.body.password !== ADMIN_PASSWORD)
+  if (req.body.password !== ADMIN_PASSWORD) {
     return res.json({ msg: "Wrong password", login: false });
+  }
 
   res.json({ msg: "Welcome", login: true });
 });
@@ -107,29 +111,35 @@ app.post("/userLogin", async (req, res) => {
 });
 
 // ===============================
-// ADD BOOK
+// ADD BOOK (PDF + IMAGE)
 // ===============================
 app.post(
   "/admin/addBook",
-  upload.fields([{ name: "pdfFile" }, { name: "bookImage" }]),
+  upload.fields([
+    { name: "pdfFile", maxCount: 1 },
+    { name: "bookImage", maxCount: 1 },
+  ]),
   async (req, res) => {
-    const { title, author } = req.body;
+    try {
+      const { title, author } = req.body;
+      const pdf = req.files?.pdfFile?.[0];
+      const img = req.files?.bookImage?.[0];
 
-    const pdf = req.files?.pdfFile?.[0];
-    const img = req.files?.bookImage?.[0];
+      if (!pdf) return res.json({ ok: false, msg: "PDF required" });
 
-    if (!pdf) return res.json({ ok: false, msg: "PDF required" });
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
 
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
+      await bookModel.create({
+        title,
+        author,
+        pdfUrl: `https://booktracker-project.onrender.com/uploads/pdfs/${pdf.filename}`,
+        bookImage: img ? `https://booktracker-project.onrender.com/uploads/images/${img.filename}` : "",
+      });
 
-    await bookModel.create({
-      title,
-      author,
-      pdfUrl: `https://booktracker-project.onrender.com/uploads/pdfs/${pdf.filename}`,
-      bookImage: img ? `https://booktracker-project.onrender.com/uploads/images/${img.filename}` : "",
-    });
-
-    res.json({ ok: true, msg: "Book added" });
+      res.json({ ok: true, msg: "Book added successfully" });
+    } catch (err) {
+      res.json({ ok: false, msg: "Upload failed" });
+    }
   }
 );
 
@@ -147,7 +157,7 @@ app.get("/admin/getBook/:id", async (req, res) => {
 });
 
 // ===============================
-// UPDATE STATUS
+// UPDATE BOOK STATUS
 // ===============================
 app.put("/user/updateBookStatus/:id", async (req, res) => {
   await bookModel.findByIdAndUpdate(req.params.id, req.body);
@@ -196,10 +206,15 @@ app.get("/user/stats/:id", async (req, res) => {
 
   const total = await bookModel.countDocuments();
   const reading = await bookModel.countDocuments({ readingStatus: "Reading" });
-  const completed = await bookModel.countDocuments({ readingStatus: "Completed" });
+  const completed = await bookModel.countDocuments({
+    readingStatus: "Completed",
+  });
   const favorites = await favoriteModel.countDocuments({ userId });
 
-  res.json({ ok: true, stats: { total, reading, completed, favorites } });
+  res.json({
+    ok: true,
+    stats: { total, reading, completed, favorites },
+  });
 });
 
 // ===============================
