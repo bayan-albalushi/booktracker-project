@@ -12,6 +12,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [localMsg, setLocalMsg] = useState("");
+  const [submitted, setSubmitted] = useState(false); // ✅ مهم
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -22,6 +23,21 @@ export default function Login() {
   const userMsg = useSelector((state) => state.user.msg);
   const userData = useSelector((state) => state.user.user);
 
+  // ✅ 1) Auto redirect if already logged in (even after a while)
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem("admin");
+    const savedUser = localStorage.getItem("user");
+
+    if (savedAdmin) {
+      navigate("/admin-dashboard", { replace: true });
+      return;
+    }
+
+    if (savedUser) {
+      navigate("/user/home", { replace: true });
+    }
+  }, [navigate]);
+
   const handleLogin = (e) => {
     e.preventDefault();
 
@@ -31,6 +47,7 @@ export default function Login() {
     }
 
     setLocalMsg("");
+    setSubmitted(true); // ✅
 
     const data = { email, password };
 
@@ -42,28 +59,35 @@ export default function Login() {
     }
   };
 
-  // ✅ clear msgs while typing
+  // ✅ clear msgs while typing + reset submitted
   useEffect(() => {
     if (email || password) {
       dispatch(clearAdminMsg());
       dispatch(clearUserMsg());
+      setLocalMsg("");
     }
   }, [email, password, dispatch]);
 
-
+  // ✅ 2) Navigate ONLY after user clicked Sign In
   useEffect(() => {
+    if (!submitted) return;
+
+    // Admin success
     if (adminData) {
       localStorage.setItem("admin", JSON.stringify(adminData));
       dispatch(clearAdminMsg());
-      navigate("/admin-dashboard");
+      setSubmitted(false);
+      navigate("/admin-dashboard", { replace: true });
     }
 
+    // User success
     if (userData) {
       localStorage.setItem("user", JSON.stringify(userData));
       dispatch(clearUserMsg());
-      navigate("/user/home");
+      setSubmitted(false);
+      navigate("/user/home", { replace: true });
     }
-  }, [adminData, userData, navigate, dispatch]);
+  }, [submitted, adminData, userData, navigate, dispatch]);
 
   return (
     <>
