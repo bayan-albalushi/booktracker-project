@@ -92,7 +92,7 @@ export default function ManageBooks() {
       if (bookImage) formData.append("bookImage", bookImage);
 
       await axios.put(
-        `${BASE_URL}/admin/updateBook/${selectedId}`,
+        `https://booktracker-project.onrender.com/admin/updateBook/${selectedId}`,
         formData,
         {
           headers: {
@@ -118,7 +118,7 @@ export default function ManageBooks() {
     if (!selectedId) return alert("Select a book first");
 
     try {
-      await axios.delete(`${BASE_URL}/admin/deleteBook/${selectedId}`, {
+      await axios.delete(`https://booktracker-project.onrender.com/admin/deleteBook/${selectedId}`, {
         headers: getAuthHeader(),
       });
 

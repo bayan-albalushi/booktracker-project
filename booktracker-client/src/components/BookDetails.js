@@ -17,7 +17,7 @@ export default function BookDetails() {
   // ===============================
   const getBook = async () => {
     try {
-      const res = await axios.get("https://booktracker-project.onrender.com/admin/getBook/${id}");
+      const res = await axios.get(`https://booktracker-project.onrender.com/admin/getBook/${id}`);
 
       setBook(res.data.book);
       setRating(res.data.book.rating || 0);
@@ -109,7 +109,7 @@ export default function BookDetails() {
               }
 
               const res = await axios.post(
-                `${BASE_URL}/user/addFavorite`,
+                "https://booktracker-project.onrender.com/user/addFavorite",
                 {
                   userId: user._id,
                   bookId: book._id,
@@ -147,7 +147,7 @@ export default function BookDetails() {
           onClick={async () => {
             try {
               await axios.put(
-                `${BASE_URL}/user/updateBookStatus/${id}`,
+                `https://booktracker-project.onrender.com/user/updateBookStatus/${id}`,
                 {
                   rating,
                   readingStatus,
