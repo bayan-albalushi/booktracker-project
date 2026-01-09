@@ -44,7 +44,7 @@ export default function UserProfile() {
     // fill edit fields
     setEditName(user.userName);
     setEditEmail(user.userEmail);
-  }, [user, navigate, BASE_URL]);
+  }, [user, navigate,"https://booktracker-project.onrender.com"]);
 
   if (!user) {
     return <h3 className="text-center mt-5">Loading User...</h3>;
