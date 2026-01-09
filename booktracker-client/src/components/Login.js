@@ -12,7 +12,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [localMsg, setLocalMsg] = useState("");
-  const [submitted, setSubmitted] = useState(false); // ✅ مهم
+  const [submitted, setSubmitted] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ export default function Login() {
   const userMsg = useSelector((state) => state.user.msg);
   const userData = useSelector((state) => state.user.user);
 
-  // ✅ 1) Auto redirect if already logged in (even after a while)
+  // ✅ Auto redirect if already logged in
   useEffect(() => {
     const savedAdmin = localStorage.getItem("admin");
     const savedUser = localStorage.getItem("user");
@@ -47,7 +47,7 @@ export default function Login() {
     }
 
     setLocalMsg("");
-    setSubmitted(true); // ✅
+    setSubmitted(true);
 
     const data = { email, password };
 
@@ -65,10 +65,23 @@ export default function Login() {
       dispatch(clearAdminMsg());
       dispatch(clearUserMsg());
       setLocalMsg("");
+      setSubmitted(false); // ✅ important
     }
   }, [email, password, dispatch]);
 
-  // ✅ 2) Navigate ONLY after user clicked Sign In
+  // ✅ If login failed, stop waiting (submitted = false)
+  useEffect(() => {
+    if (!submitted) return;
+
+    const adminFailed = adminMsg && !adminData; // msg exists but no admin data
+    const userFailed = userMsg && !userData;   // msg exists but no user data
+
+    if (adminFailed || userFailed) {
+      setSubmitted(false);
+    }
+  }, [submitted, adminMsg, userMsg, adminData, userData]);
+
+  // ✅ Navigate ONLY after clicking Sign In and success data exists
   useEffect(() => {
     if (!submitted) return;
 

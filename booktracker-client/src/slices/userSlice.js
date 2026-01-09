@@ -16,6 +16,8 @@ export const userLoginThunk = createAsyncThunk(
 
       if (res.data.login === true) {
         localStorage.setItem("user", JSON.stringify(res.data.user));
+      } else {
+        return thunkAPI.rejectWithValue(res.data.msg || "Login failed");
       }
 
       return res.data;
@@ -40,7 +42,6 @@ const userSlice = createSlice({
       localStorage.removeItem("user");
     },
 
-    // ✅ ADD THIS
     clearUserMsg: (state) => {
       state.msg = "";
     },
@@ -52,7 +53,7 @@ const userSlice = createSlice({
     });
 
     builder.addCase(userLoginThunk.fulfilled, (state, action) => {
-      state.msg = action.payload.msg;   // could be "Welcome"
+      state.msg = action.payload.msg; // "Welcome"
       state.user = action.payload.user;
       state.role = "user";
     });
