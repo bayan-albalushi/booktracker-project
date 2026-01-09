@@ -7,64 +7,31 @@ import { useSelector } from "react-redux";
 export default function Settings() {
   const navigate = useNavigate();
 
-  const user = useSelector((state) => state.user.user);
+  const reduxUser = useSelector((state) => state.user.user);
+  const user =
+    reduxUser || JSON.parse(localStorage.getItem("user") || "null");
 
   const [oldPwd, setOldPwd] = useState("");
   const [newPwd, setNewPwd] = useState("");
   const [loading, setLoading] = useState(false);
 
-  
-  // ===============================
-  // AUTH GUARD
-  // ===============================
   useEffect(() => {
-    const token = localStorage.getItem("userToken");
-    if (!token || !user) {
+    if (!user?._id) {
       navigate("/");
     }
-  }, [navigate, user]);
+  }, [navigate, user?._id]);
 
-  // ===============================
-  // CHANGE PASSWORD
-  // ===============================
   const handleChangePassword = async () => {
-    if (!oldPwd || !newPwd)
-      return alert("Both fields are required");
+    if (!oldPwd || !newPwd) return alert("Both fields are required");
 
-    try {
-      setLoading(true);
-
-      const token = localStorage.getItem("userToken");
-
-      const res = await axios.put(
-      "https://booktracker-project.onrender.com/user/changePassword",
-        {
-          oldPassword: oldPwd,
-          newPassword: newPwd,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      alert(res.data.msg || "Password updated");
-      setOldPwd("");
-      setNewPwd("");
-    } catch (err) {
-      console.error("Change password error:", err);
-      alert(
-        err.response?.data?.msg || "Failed to update password"
-      );
-    } finally {
-      setLoading(false);
-    }
+    // ⚠️ السيرفر عندك ما فيه route changePassword حاليا
+    alert(
+      "Change Password API is not implemented in server yet. (Need /user/changePassword endpoint)"
+    );
   };
 
   return (
     <>
-      {/* HEADER */}
       <div
         style={{
           backgroundColor: "#A47C78",
@@ -77,21 +44,11 @@ export default function Settings() {
           <FiArrowLeft size={26} />
         </Link>
 
-        <span style={{ fontSize: 24, fontWeight: "bold" }}>
-          BOOK TRACKER
-        </span>
+        <span style={{ fontSize: 24, fontWeight: "bold" }}>BOOK TRACKER</span>
       </div>
 
-      {/* CONTENT */}
       <div className="container mt-4" style={{ maxWidth: 600 }}>
-        <h2
-          style={{
-            textAlign: "center",
-            fontWeight: 700,
-          }}
-        >
-          Settings
-        </h2>
+        <h2 style={{ textAlign: "center", fontWeight: 700 }}>Settings</h2>
 
         <div className="mt-4">
           <label>Old Password</label>

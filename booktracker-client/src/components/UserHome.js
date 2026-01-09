@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { FiLogOut } from "react-icons/fi";
+import bookLogo from "../images/book.png"; 
+
 
 export default function UserHome() {
   const user = useSelector((state) => state.user.user);

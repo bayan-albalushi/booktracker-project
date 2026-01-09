@@ -2,34 +2,23 @@ import { useEffect, useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import bookLogo from "../images/book.png";
+import bookLogo from "../images/book.png"; // تأكدي المسار صحيح 100%
 
 export default function MyFavorites() {
   const [favorites, setFavorites] = useState([]);
   const navigate = useNavigate();
 
-  
-
-  // ===============================
-  // GET FAVORITES
-  // ===============================
   const getFavorites = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      const token = localStorage.getItem("userToken");
 
-      if (!user || !token) {
+      if (!user?._id) {
         navigate("/");
         return;
       }
 
       const res = await axios.get(
-        `https://booktracker-project.onrender.com/user/favorites/${user._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `https://booktracker-project.onrender.com/user/favorites/${user._id}`
       );
 
       setFavorites(res.data.favorites || []);
@@ -40,6 +29,7 @@ export default function MyFavorites() {
 
   useEffect(() => {
     getFavorites();
+    // eslint-disable-next-line
   }, []);
 
   return (
@@ -60,6 +50,7 @@ export default function MyFavorites() {
         <img
           src={bookLogo}
           alt="logo"
+          onError={(e) => (e.currentTarget.style.display = "none")}
           style={{ height: "35px", marginRight: "10px" }}
         />
 
@@ -92,6 +83,7 @@ export default function MyFavorites() {
             <img
               src={fav.image}
               alt="book"
+              onError={(e) => (e.currentTarget.style.display = "none")}
               style={{
                 width: "100%",
                 height: "150px",
@@ -108,7 +100,7 @@ export default function MyFavorites() {
                 <span
                   key={star}
                   style={{
-                    color: star <= fav.rating ? "#A47C78" : "#ccc",
+                    color: star <= (fav.rating || 0) ? "#A47C78" : "#ccc",
                   }}
                 >
                   ★

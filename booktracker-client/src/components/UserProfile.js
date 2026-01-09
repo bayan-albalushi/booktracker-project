@@ -8,98 +8,43 @@ export default function UserProfile() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const user = useSelector((state) => state.user.user);
+  const reduxUser = useSelector((state) => state.user.user);
 
   const [stats, setStats] = useState(null);
   const [showEdit, setShowEdit] = useState(false);
 
-  // Edit fields
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
 
-  
+  // ✅ احسن: خذ المستخدم من localStorage إذا redux فاضي
+  const user =
+    reduxUser || JSON.parse(localStorage.getItem("user") || "null");
 
-  // ===============================
-  // AUTH GUARD + FETCH DATA
-  // ===============================
   useEffect(() => {
-    const token = localStorage.getItem("userToken");
-    const storedUser = localStorage.getItem("user");
-
-    if (!token || !storedUser || !user?._id) {
+    if (!user?._id) {
       navigate("/");
       return;
     }
 
-    // fetch stats
+    // ✅ endpoint الصحيح مع id
     axios
-      .get("https://booktracker-project.onrender.com/user/stats", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get(`https://booktracker-project.onrender.com/user/stats/${user._id}`)
       .then((res) => setStats(res.data.stats))
       .catch((err) => console.error("STATS ERROR:", err));
 
-    // fill edit fields
-    setEditName(user.userName);
-    setEditEmail(user.userEmail);
-  }, [user, navigate,"https://booktracker-project.onrender.com"]);
+    setEditName(user.userName || "");
+    setEditEmail(user.userEmail || "");
+  }, [user?._id, navigate]); // ✅ dependencies صح
 
-  if (!user) {
-    return <h3 className="text-center mt-5">Loading User...</h3>;
-  }
+  if (!user) return <h3 className="text-center mt-5">Loading User...</h3>;
+  if (!stats) return <h3 className="text-center mt-5">Loading Stats...</h3>;
 
-  if (!stats) {
-    return <h3 className="text-center mt-5">Loading Stats...</h3>;
-  }
-
-  // ===============================
-  // UPDATE PROFILE
-  // ===============================
+  // ⚠️ ملاحظة: السيرفر عندك ما فيه /user/updateProfile حاليا
+  // إذا ما تبغي تضيفيه في السيرفر، خلي زر Edit فقط UI بدون حفظ
   const updateProfile = async () => {
-    if (!editName || !editEmail) {
-      alert("All fields are required");
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("userToken");
-
-      const res = await axios.put(
-        "https://booktracker-project.onrender.com/user/updateProfile",
-        {
-          userName: editName,
-          userEmail: editEmail,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      alert(res.data.msg || "Profile updated!");
-
-      const updatedUser = {
-        ...user,
-        userName: editName,
-        userEmail: editEmail,
-      };
-
-      dispatch({
-        type: "user/updateProfile",
-        payload: updatedUser,
-      });
-
-      // update localStorage
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-
-      setShowEdit(false);
-    } catch (err) {
-      console.error("Update profile error:", err);
-      alert("Failed to update profile");
-    }
+    alert(
+      "Update Profile API is not implemented in server yet. (Need /user/updateProfile endpoint)"
+    );
   };
 
   return (
@@ -117,24 +62,16 @@ export default function UserProfile() {
           <FiArrowLeft size={26} />
         </Link>
 
-        <span
-          style={{
-            fontSize: 22,
-            fontWeight: "bold",
-            marginLeft: 10,
-          }}
-        >
+        <span style={{ fontSize: 22, fontWeight: "bold", marginLeft: 10 }}>
           BOOK TRACKER
         </span>
       </div>
 
-      {/* CONTENT */}
       <div className="container mt-4" style={{ maxWidth: "600px" }}>
         <h2 className="text-center" style={{ fontWeight: 700 }}>
           User Profile
         </h2>
 
-        {/* USER INFO */}
         <label style={{ fontWeight: 600 }}>User Name</label>
         <input
           disabled
@@ -153,7 +90,6 @@ export default function UserProfile() {
           style={{ borderRadius: "8px" }}
         />
 
-        {/* EDIT BUTTON */}
         <button
           className="btn w-100"
           onClick={() => setShowEdit(!showEdit)}
@@ -168,14 +104,10 @@ export default function UserProfile() {
           {showEdit ? "Cancel" : "Edit Profile"}
         </button>
 
-        {/* EDIT FORM */}
         {showEdit && (
           <div
             className="mt-4 p-3"
-            style={{
-              background: "#f0f0f0",
-              borderRadius: "12px",
-            }}
+            style={{ background: "#f0f0f0", borderRadius: "12px" }}
           >
             <h5 style={{ fontWeight: "700" }}>Update Profile</h5>
 
@@ -211,7 +143,6 @@ export default function UserProfile() {
           </div>
         )}
 
-        {/* STATS */}
         <h5 className="mt-4" style={{ fontWeight: 600 }}>
           Your Book Statistics
         </h5>
