@@ -3,11 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 
-import { adminLoginThunk } from "../slices/adminSlice";
-import { userLoginThunk } from "../slices/userSlice";
-
-import { clearAdminMsg } from "../slices/adminSlice";
-import { clearUserMsg } from "../slices/userSlice";
+import { adminLoginThunk, clearAdminMsg } from "../slices/adminSlice";
+import { userLoginThunk, clearUserMsg } from "../slices/userSlice";
 
 import bookLogo from "../images/book.png";
 
@@ -20,6 +17,8 @@ export default function Login() {
   const navigate = useNavigate();
 
   const adminMsg = useSelector((state) => state.admin.msg);
+  const adminData = useSelector((state) => state.admin.admin);
+
   const userMsg = useSelector((state) => state.user.msg);
   const userData = useSelector((state) => state.user.user);
 
@@ -35,13 +34,15 @@ export default function Login() {
 
     const data = { email, password };
 
-    if (email === "admin@booktracker.com") {
+    // ✅ Admin detection
+    if (email.toLowerCase().includes("admin")) {
       dispatch(adminLoginThunk(data));
     } else {
       dispatch(userLoginThunk(data));
     }
   };
 
+  // ✅ clear msgs while typing
   useEffect(() => {
     if (email || password) {
       dispatch(clearAdminMsg());
@@ -49,23 +50,20 @@ export default function Login() {
     }
   }, [email, password, dispatch]);
 
+  // ✅ handle result
   useEffect(() => {
-    // admin login
-    if (adminMsg === "Welcome") {
-      localStorage.setItem("adminEmail", email);
-
+    if (adminMsg === "Welcome" && adminData) {
+      localStorage.setItem("admin", JSON.stringify(adminData));
       dispatch(clearAdminMsg());
       navigate("/admin-dashboard");
     }
 
-    // user login
     if (userMsg === "Welcome" && userData) {
       localStorage.setItem("user", JSON.stringify(userData));
-
       dispatch(clearUserMsg());
       navigate("/user/home");
     }
-  }, [adminMsg, userMsg, userData, email, navigate, dispatch]);
+  }, [adminMsg, adminData, userMsg, userData, navigate, dispatch]);
 
   return (
     <>

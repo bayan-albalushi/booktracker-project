@@ -8,7 +8,10 @@ export const adminRegisterThunk = createAsyncThunk(
   "admin/register",
   async (formData, thunkAPI) => {
     try {
-      const res = await axios.post("https://booktracker-project.onrender.com/adminRegister", formData);
+      const res = await axios.post(
+        "https://booktracker-project.onrender.com/adminRegister",
+        formData
+      );
       if (!res.data.ok) return thunkAPI.rejectWithValue(res.data.msg);
       return res.data.msg;
     } catch (err) {
@@ -24,7 +27,10 @@ export const adminLoginThunk = createAsyncThunk(
   "admin/login",
   async (formData, thunkAPI) => {
     try {
-      const res = await axios.post("https://booktracker-project.onrender.com/adminLogin", formData);
+      const res = await axios.post(
+        "https://booktracker-project.onrender.com/adminLogin",
+        formData
+      );
       if (!res.data.login) return thunkAPI.rejectWithValue(res.data.msg);
 
       return res.data.admin; // return admin data
@@ -50,6 +56,11 @@ const adminSlice = createSlice({
       state.admin = null;
       state.msg = "";
       localStorage.removeItem("admin");
+    },
+
+    // ✅ ADD THIS
+    clearAdminMsg: (state) => {
+      state.msg = "";
     },
   },
 
@@ -85,5 +96,5 @@ const adminSlice = createSlice({
   },
 });
 
-export const { logoutAdmin } = adminSlice.actions;
+export const { logoutAdmin, clearAdminMsg } = adminSlice.actions;
 export default adminSlice.reducer;
