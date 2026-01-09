@@ -1,6 +1,5 @@
 import "bootstrap/dist/css/bootstrap.css";
 import * as Reactstrap from "reactstrap";
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
@@ -47,7 +46,6 @@ function App() {
               <Route path="/admin/settings" element={<AdminSettings />} />
 
               {/* USER (PROTECTED) */}
-              <Route element={<ProtectedRoute />}>
                 <Route path="/user/home" element={<UserHome />} />
                 <Route path="/user/aboutBooks" element={<AboutBooks />} />
                 <Route path="/user/profile" element={<UserProfile />} />
