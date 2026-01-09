@@ -11,14 +11,14 @@ export default function UserHome() {
   const dispatch = useDispatch();
 
   // ===============================
-  // AUTH GUARD
+  // AUTH GUARD (FIXED)
   // ===============================
   useEffect(() => {
-    const token = localStorage.getItem("userToken");
     const storedUser = localStorage.getItem("user");
+    const storedEmail = localStorage.getItem("userEmail");
 
-    if (!token || !storedUser) {
-      navigate("/");
+    if (!storedUser && !storedEmail) {
+      navigate("/login");
     }
   }, [navigate]);
 
@@ -27,16 +27,16 @@ export default function UserHome() {
   // ===============================
   const handleLogout = () => {
     localStorage.removeItem("user");
-    localStorage.removeItem("userToken");
+    localStorage.removeItem("userEmail");
 
-    dispatch({ type: "user/logout" }); // safe even if reducer ignores it
-    navigate("/");
+    dispatch({ type: "user/logout" });
+    navigate("/login");
   };
 
   // ===============================
-  // PREVENT CRASH
+  // PREVENT CRASH (LIVE SAFE)
   // ===============================
-  if (!user) {
+  if (!user && !localStorage.getItem("user")) {
     return <h3 className="text-center mt-5">Loading...</h3>;
   }
 
@@ -52,7 +52,6 @@ export default function UserHome() {
           justifyContent: "space-between",
         }}
       >
-        {/* CENTER LOGO + TITLE */}
         <div
           style={{
             display: "flex",
@@ -66,7 +65,6 @@ export default function UserHome() {
             alt="logo"
             style={{ height: "35px", marginRight: "12px" }}
           />
-
           <span
             style={{
               fontSize: "24px",
@@ -78,7 +76,6 @@ export default function UserHome() {
           </span>
         </div>
 
-        {/* LOGOUT */}
         <FiLogOut
           size={26}
           style={{ cursor: "pointer" }}
