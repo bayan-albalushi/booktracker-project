@@ -6,6 +6,9 @@ import { useState, useEffect } from "react";
 import { adminLoginThunk } from "../slices/adminSlice";
 import { userLoginThunk } from "../slices/userSlice";
 
+import { clearAdminMsg } from "../slices/adminSlice";
+import { clearUserMsg } from "../slices/userSlice";
+
 import bookLogo from "../images/book.png";
 
 export default function Login() {
@@ -40,20 +43,29 @@ export default function Login() {
   };
 
   useEffect(() => {
+    if (email || password) {
+      dispatch(clearAdminMsg());
+      dispatch(clearUserMsg());
+    }
+  }, [email, password, dispatch]);
+
+  useEffect(() => {
     // admin login
     if (adminMsg === "Welcome") {
       localStorage.setItem("adminEmail", email);
+
+      dispatch(clearAdminMsg());
       navigate("/admin-dashboard");
     }
 
     // user login
     if (userMsg === "Welcome" && userData) {
-
       localStorage.setItem("user", JSON.stringify(userData));
 
+      dispatch(clearUserMsg());
       navigate("/user/home");
     }
-  }, [adminMsg, userMsg, userData, email, navigate]);
+  }, [adminMsg, userMsg, userData, email, navigate, dispatch]);
 
   return (
     <>
