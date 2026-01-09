@@ -59,7 +59,6 @@ function App() {
                 />
                 <Route path="/user/settings" element={<Settings />} />
 
-                {/* إذا BookDetails/PdfViewer للمستخدم بعد تسجيل الدخول */}
                 <Route path="/books/:id" element={<BookDetails />} />
                 <Route path="/pdf/:id" element={<PdfViewer />} />
                 <Route path="/store-map" element={<StoreMap />} />
