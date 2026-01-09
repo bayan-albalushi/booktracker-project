@@ -65,7 +65,7 @@ export default function Login() {
       dispatch(clearAdminMsg());
       dispatch(clearUserMsg());
       setLocalMsg("");
-      setSubmitted(false); // ✅ important
+      setSubmitted(false);
     }
   }, [email, password, dispatch]);
 
@@ -73,8 +73,8 @@ export default function Login() {
   useEffect(() => {
     if (!submitted) return;
 
-    const adminFailed = adminMsg && !adminData; // msg exists but no admin data
-    const userFailed = userMsg && !userData;   // msg exists but no user data
+    const adminFailed = adminMsg && !adminData;
+    const userFailed = userMsg && !userData;
 
     if (adminFailed || userFailed) {
       setSubmitted(false);
@@ -170,14 +170,16 @@ export default function Login() {
 
             <button
               className="btn w-100 mt-2"
+              disabled={submitted}   // ✅ prevent double click
               style={{
                 backgroundColor: "#A47C78",
                 color: "black",
                 fontWeight: "bold",
                 borderRadius: "20px",
+                opacity: submitted ? 0.7 : 1,
               }}
             >
-              Sign In
+              {submitted ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
