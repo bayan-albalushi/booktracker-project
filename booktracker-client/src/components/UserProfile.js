@@ -17,11 +17,7 @@ export default function UserProfile() {
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
 
-  // ===============================
-  // BASE URL (Render أو Local)
-  // ===============================
-  const BASE_URL =
-    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
+  
 
   // ===============================
   // AUTH GUARD + FETCH DATA

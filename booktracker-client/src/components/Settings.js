@@ -13,12 +13,7 @@ export default function Settings() {
   const [newPwd, setNewPwd] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ===============================
-  // BASE URL (Render أو Local)
-  // ===============================
-  const BASE_URL =
-    process.env.REACT_APP_BASE_URL || "https://booktracker-project.onrender.com";
-
+  
   // ===============================
   // AUTH GUARD
   // ===============================

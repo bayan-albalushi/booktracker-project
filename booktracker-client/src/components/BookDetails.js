@@ -141,7 +141,7 @@ export default function BookDetails() {
           style={{ backgroundColor: "#A47C78", color: "white" }}
           onClick={async () => {
             try {
-              await axios.put(`${API_BASE_URL}/user/updateBookStatus/${id}`, {
+              await axios.put(`https://booktracker-project.onrender.com/user/updateBookStatus/${id}`, {
                 rating,
                 readingStatus,
               });
