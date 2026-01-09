@@ -170,7 +170,7 @@ export default function Login() {
 
             <button
               className="btn w-100 mt-2"
-              disabled={submitted}   // ✅ prevent double click
+              disabled={submitted}   
               style={{
                 backgroundColor: "#A47C78",
                 color: "black",

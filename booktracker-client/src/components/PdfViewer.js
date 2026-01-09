@@ -7,14 +7,9 @@ export default function PdfViewer() {
   const [book, setBook] = useState(null);
   const [error, setError] = useState("");
 
-
-
-  // ===============================
-  // GET BOOK
-  // ===============================
   const getBook = async () => {
     try {
-      const res = await axios.get(` https://booktracker-project.onrender.com/admin/getBook/${id}`);
+      const res = await axios.get(`https://booktracker-project.onrender.com/admin/getBook/${id}`);
       setBook(res.data.book);
     } catch (err) {
       console.error("PDF ERROR:", err);
@@ -26,29 +21,10 @@ export default function PdfViewer() {
     getBook();
   }, []);
 
-  // ===============================
-  // STATES
-  // ===============================
-  if (error)
-    return (
-      <h3 className="text-center mt-5 text-danger">
-        {error}
-      </h3>
-    );
+  if (error) return <h3 className="text-center mt-5 text-danger">{error}</h3>;
+  if (!book) return <h3 className="text-center mt-5">Loading...</h3>;
+  if (!book.pdfUrl) return <h3 className="text-center mt-5 text-danger">No PDF available</h3>;
 
-  if (!book)
-    return <h3 className="text-center mt-5">Loading...</h3>;
-
-  if (!book.pdfUrl)
-    return (
-      <h3 className="text-center mt-5 text-danger">
-        No PDF available
-      </h3>
-    );
-
-  // ===============================
-  // UI
-  // ===============================
   return (
     <div style={{ padding: "20px" }}>
       <h2>{book.title}</h2>
@@ -60,7 +36,7 @@ export default function PdfViewer() {
         width="100%"
         height="600px"
         style={{ border: "none" }}
-      ></iframe>
+      />
     </div>
   );
 }

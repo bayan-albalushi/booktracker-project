@@ -10,8 +10,6 @@ export default function BookDetails() {
   const [rating, setRating] = useState(0);
   const [readingStatus, setReadingStatus] = useState("Reading");
 
-  
-
   // ===============================
   // GET BOOK
   // ===============================
@@ -29,6 +27,7 @@ export default function BookDetails() {
 
   useEffect(() => {
     getBook();
+    // eslint-disable-next-line
   }, []);
 
   if (!book) return <h3 className="text-center mt-5">Loading...</h3>;
@@ -44,13 +43,11 @@ export default function BookDetails() {
           alignItems: "center",
         }}
       >
-        <Link to="/books" style={{ color: "black", marginRight: "15px" }}>
+        <Link to="/user/aboutBooks" style={{ color: "black", marginRight: "15px" }}>
           <FiArrowLeft size={26} />
         </Link>
 
-        <span style={{ fontSize: "24px", fontWeight: "bold" }}>
-          BOOK TRACKER
-        </span>
+        <span style={{ fontSize: "24px", fontWeight: "bold" }}>BOOK TRACKER</span>
       </div>
 
       <h2 className="text-center mt-4">{book.title}</h2>
@@ -58,8 +55,9 @@ export default function BookDetails() {
       <div className="container mt-4">
         {/* BOOK IMAGE */}
         <img
-          src={book.bookImage}
+          src={book.bookImage || "/images/book.png"}
           alt="book"
+          onError={(e) => (e.currentTarget.src = "/images/book.png")}
           style={{
             width: "100%",
             height: "200px",
@@ -108,17 +106,14 @@ export default function BookDetails() {
                 return;
               }
 
-              const res = await axios.post(
-                "https://booktracker-project.onrender.com/user/addFavorite",
-                {
-                  userId: user._id,
-                  bookId: book._id,
-                  title: book.title,
-                  author: book.author,
-                  image: book.bookImage,
-                  rating,
-                }
-              );
+              const res = await axios.post("https://booktracker-project.onrender.com/user/addFavorite", {
+                userId: user._id,
+                bookId: book._id,
+                title: book.title,
+                author: book.author,
+                image: book.bookImage,
+                rating,
+              });
 
               alert(res.data.msg);
             } catch (err) {
@@ -146,13 +141,10 @@ export default function BookDetails() {
           style={{ backgroundColor: "#A47C78", color: "white" }}
           onClick={async () => {
             try {
-              await axios.put(
-                `https://booktracker-project.onrender.com/user/updateBookStatus/${id}`,
-                {
-                  rating,
-                  readingStatus,
-                }
-              );
+              await axios.put(`${API_BASE_URL}/user/updateBookStatus/${id}`, {
+                rating,
+                readingStatus,
+              });
 
               alert("Saved!");
             } catch (err) {
@@ -167,13 +159,17 @@ export default function BookDetails() {
         {/* PDF */}
         <h4 className="mt-4">Book PDF</h4>
 
-        <iframe
-          src={book.pdfUrl}
-          width="100%"
-          height="500"
-          style={{ border: "none" }}
-          title="pdf"
-        ></iframe>
+        {book.pdfUrl ? (
+          <iframe
+            src={book.pdfUrl}
+            width="100%"
+            height="500"
+            style={{ border: "none" }}
+            title="pdf"
+          />
+        ) : (
+          <p className="text-danger">No PDF available</p>
+        )}
       </div>
     </>
   );

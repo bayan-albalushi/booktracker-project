@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { FiArrowLeft, FiSearch } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { API_BASE_URL } from "../api";
 
 export default function AboutBooks() {
   const [books, setBooks] = useState([]);
@@ -17,7 +16,7 @@ export default function AboutBooks() {
 
   const getBooks = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/admin/books`);
+      const res = await axios.get("https://booktracker-project.onrender.com/admin/books");
       setBooks(res.data.books || []);
     } catch (err) {
       console.error("Error fetching books:", err);
@@ -40,7 +39,7 @@ export default function AboutBooks() {
     if (!user) return alert("User not logged in");
 
     try {
-      await axios.post(`${API_BASE_URL}/user/sendRequest`, {
+      await axios.post("https://booktracker-project.onrender.com/user/sendRequest", {
         userId: user._id,
         bookName,
         authorName,
